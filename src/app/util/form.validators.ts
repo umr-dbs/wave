@@ -112,6 +112,9 @@ function uniqueProjectNameValidator(storageService: StorageService): AsyncValida
 
 function notOnlyWhitespace(control: AbstractControl) {
     const text = control.value as string;
+    if (text === null || text === undefined) {
+        return {'onlyWhitespace': true};
+    }
     return text.trim().length <= 0 ? {'onlyWhitespace': true} : null;
 }
 

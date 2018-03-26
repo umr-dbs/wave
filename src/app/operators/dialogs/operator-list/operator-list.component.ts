@@ -29,6 +29,8 @@ import {RasterPolygonClipOperatorComponent} from '../raster-polygon-clip/raster-
 import {OperatorType} from '../../operator-type.model';
 import {HeatmapOperatorComponent} from '../heatmap/heatmap.component';
 import {HeatmapType} from '../../types/heatmap-type.model';
+import {TerminologyLookupOperatorComponent} from '../terminology-lookup/terminology-lookup.component';
+import {TerminologyLookupType} from '../../types/terminology-lookup-type';
 
 interface OperatorListType {
     component: Type<any>;
@@ -108,6 +110,11 @@ const VECTOR_OPERATORS: Array<OperatorListType> = [
         component: TextualAttributeFilterOperatorComponent,
         type: TextualAttributeFilterType,
         description: 'Filter data via text filter',
+    },
+    {
+        component: TerminologyLookupOperatorComponent,
+        type: TerminologyLookupType,
+        description: 'GFBio Terminology lookup',
     }
 ];
 

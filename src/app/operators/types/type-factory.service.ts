@@ -37,6 +37,7 @@ import {BoxPlotType, BoxPlotTypeDict} from './boxplot-type.model';
 import {PieChartType, PieChartTypeDict} from './piechart-type.model';
 import {RasterizePolygonType, RasterizePolygonTypeDict} from './rasterize-polygon-type.model';
 import {HeatmapType, HeatmapTypeDict} from './heatmap-type.model';
+import {TerminologyLookupType, TerminologyLookupTypeDict} from './terminology-lookup-type';
 
 /**
  * A simple factory for de-serializing operator types.
@@ -105,8 +106,10 @@ export abstract class OperatorTypeFactory {
                 return RasterizePolygonType.fromDict(dict as RasterizePolygonTypeDict);
             case HeatmapType.TYPE:
                 return HeatmapType.fromDict(dict as HeatmapTypeDict);
+            case TerminologyLookupType.TYPE:
+                return TerminologyLookupType.fromDict(dict as TerminologyLookupTypeDict);
             default:
-                throw Error('There is not factory method defined for this operator.');
+                throw Error('There is not factory method defined for this operator: "' + dict.operatorType + '".');
         }
     }
 }

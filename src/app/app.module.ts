@@ -137,6 +137,7 @@ import {SymbologyEditorComponent} from './layers/symbology/symbology-editor/symb
 import {SymbologyRasterMappingColorizerComponent} from './layers/symbology/symbology-raster/symbology-raster-mapping-colorizer.component';
 import {ColorizerEditorComponent} from './layers/symbology/symbology-raster/colorizer-editor.component';
 import {HeatmapOperatorComponent} from './operators/dialogs/heatmap/heatmap.component';
+import {TerminologyLookupOperatorComponent} from './operators/dialogs/terminology-lookup/terminology-lookup.component';
 
 export function configInitializer(config: Config) {
     return () => config.load();
@@ -259,6 +260,7 @@ export function configInitializer(config: Config) {
         ColorizerEditorComponent,
         ZoomHandlesComponent,
         HeatmapOperatorComponent,
+        TerminologyLookupOperatorComponent,
     ],
     imports: [
         BrowserModule,
@@ -319,6 +321,7 @@ export function configInitializer(config: Config) {
         SymbologyEditorComponent,
         ColorizerEditorComponent,
         HeatmapOperatorComponent,
+        TerminologyLookupOperatorComponent,
     ],
     providers: [
         DragulaService,
