@@ -21,7 +21,7 @@
                 padding: 0;
                 color: whitesmoke;
                 text-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-                background: #335AA3;
+                background: #00796a;
             }
             h1 {
                 text-align: center;
@@ -31,15 +31,24 @@
                 line-height: 20vh;
                 margin: 30vh 0 0 0;
             }
-            h1 span {
-                background: url('assets/vat_logo.svg') right no-repeat;
-                background-size: 18vh 18vh;
-                height: calc(18vh - 1px);
-                width: calc(18vh - 1px);
-                border: 1px solid whitesmoke;
-                border-radius: 18vh;
+            h1 .logo {
+                background: url('assets/geobon-logo.svg') right no-repeat;
+                background-size: 42.157894737vh 9vh;
+                height: calc(9vh - 1px);
+                width: calc(42.157894737vh - 1px);
                 display: inline-block;
                 filter: drop-shadow(0 1px 3px rgba(0,0,0,0.12)) drop-shadow(0 1px 2px rgba(0,0,0,0.24));
+            }
+            h1 .subtitle {
+                font-family: Roboto, 'Helvetica Neue', sans-serif;
+                font-size: 2vh;
+                line-height: 2vh;
+                width: 17.5vh;
+                display: block;
+                margin-left: calc(50vw + (42.157894737vh / 2) - (17.5vh / 1.5));
+            }
+            h1 .subtitle .vat {
+                font-family: 'Pacifico', cursive;
             }
             div {
                 text-align: center;
@@ -72,7 +81,10 @@
                 animation-delay: 0.4s;
             }
         </style>
-        <h1><span class="logo"></span>VAT</h1>
+        <h1>
+            <span class="logo"></span><br>
+            <span class="subtitle">powered by <span class="vat">VAT</span></span>
+        </h1>
         <div class="dots">
             <span>&middot;</span>
             <span>&middot;</span>
