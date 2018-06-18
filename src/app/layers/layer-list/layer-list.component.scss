@@ -58,8 +58,10 @@ $accent: map-get($wave-app-theme, accent);
 
     mat-icon {
         vertical-align: baseline;
-        height: 1rem;
-        width: 80px;
+        height: 1.5rem;
+        width: 100px;
+        margin-top: 0.75rem;
+        margin-left: 1rem;
     }
 
     .title {
@@ -67,11 +69,10 @@ $accent: map-get($wave-app-theme, accent);
     }
 
     .subtitle {
-        font-size: 0.75rem;
-    }
-
-    .up {
-        vertical-align: text-top;
+        font-size: 0.5rem;
+        position: absolute;
+        margin-top: -1.25rem;
+        margin-left: 1.5rem;
     }
 }
 
