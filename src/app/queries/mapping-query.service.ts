@@ -195,6 +195,8 @@ export class MappingQueryService {
         });
         if (config.clustered) {
             parameters.setParameter('clustered', config.clustered);
+            parameters.setParameter('clustered_min_radius', 8);
+            parameters.setParameter('clustered_min_distance', 2);
         } else {
             parameters.setParameter('clustered', false);
         }
