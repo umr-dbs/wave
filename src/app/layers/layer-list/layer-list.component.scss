@@ -61,7 +61,7 @@ $accent: map-get($wave-app-theme, accent);
         height: 1.5rem;
         width: 100px;
         margin-top: 0.75rem;
-        margin-left: 1rem;
+        margin-left: 0;
     }
 
     .title {
@@ -72,7 +72,7 @@ $accent: map-get($wave-app-theme, accent);
         font-size: 0.5rem;
         position: absolute;
         margin-top: -1.25rem;
-        margin-left: 1.5rem;
+        margin-left: 0.5rem;
     }
 }
 
