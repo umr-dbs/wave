@@ -1,0 +1,12 @@
+<wave-sidenav-header>GEO-BON</wave-sidenav-header>
+<form [formGroup]="form" (ngSubmit)="$event.preventDefault();reload()">
+    <wave-country-selection (layer)="setCountryLayer($event)"></wave-country-selection>
+    <mat-select>
+        <mat-option *ngFor="let layer of ebv">
+
+        </mat-option>
+    </mat-select>
+    <button mat-raised-button type="submit" color="primary">
+        Reload
+    </button>
+</form>

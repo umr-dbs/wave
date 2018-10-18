@@ -35,7 +35,6 @@ import {MapComponent} from './map/map.component';
 import {Layer, VectorLayer} from './layers/layer.model';
 import {LayerService} from './layers/layer.service';
 import {SplashDialogComponent} from './dialogs/splash-dialog/splash-dialog.component';
-import {PlotListComponent} from './plots/plot-list/plot-list.component';
 import {DomSanitizer} from '@angular/platform-browser';
 import {RandomColorService} from './util/services/random-color.service';
 import {ActivatedRoute} from '@angular/router';
@@ -58,6 +57,7 @@ import {Operator} from './operators/operator.model';
 import {Config} from './config.service';
 import {OverlayContainer} from '@angular/cdk/overlay';
 import {MapService} from './map/map.service';
+import {EBVComponent} from './components/ebv-selection/ebv-selection.component';
 
 @Component({
     selector: 'wave-app',
@@ -67,7 +67,6 @@ import {MapService} from './map/map.service';
 })
 export class AppComponent implements OnInit, AfterViewInit {
     @ViewChild(MapComponent) mapComponent: MapComponent;
-    @ViewChild(MatTabGroup) bottomTabs: MatTabGroup;
 
     @ViewChild(MatSidenav) rightSidenav: MatSidenav;
     @ViewChild(SidenavContainerComponent) rightSidenavContainer: SidenavContainerComponent;
@@ -139,16 +138,7 @@ export class AppComponent implements OnInit, AfterViewInit {
                 this.rightSidenav.close();
             }
         });
-        this.projectService.getNewPlotStream()
-            .subscribe(() => this.layoutService.setSidenavContentComponent({component: PlotListComponent}));
-
-        // set the stored tab index
-        this.layoutService.getLayerDetailViewTabIndexStream().subscribe(tabIndex => {
-            if (this.bottomTabs.selectedIndex !== tabIndex) {
-                this.bottomTabs.selectedIndex = tabIndex;
-                setTimeout(() => this.changeDetectorRef.markForCheck());
-            }
-        });
+        this.layoutService.setSidenavContentComponent({component: EBVComponent})
 
         // show splash screen
         if (this.userService.shouldShowIntroductoryPopup()) {
@@ -169,35 +159,7 @@ export class AppComponent implements OnInit, AfterViewInit {
             this.handleWorkflowParameters();
 
         }
-    }
-
-    setTabIndex(index: number) {
-        this.layoutService.setLayerDetailViewTabIndex(index);
-        this.layoutService.setLayerDetailViewVisibility(true);
-    }
-
-    @HostListener('window:message', ['$event.data'])
-    public handleMessage(message: { type: string }) {
-        switch (message.type) {
-            case 'TOKEN_LOGIN':
-                const tokenMessage = message as { type: string, token: string };
-                this.userService.gfbioTokenLogin(tokenMessage.token).subscribe(() => {
-                    this.storageService.getStatus().pipe(
-                        filter(status => status === StorageStatus.OK),
-                        first()
-                    ).subscribe(() => {
-                        this.handleWorkflowParameters();
-                    });
-                });
-                break;
-            default:
-            // unhandled message
-        }
-    }
-
-    @HostListener('window:resize')
-    private windowHeight() {
-        this.windowHeight$.next(window.innerHeight);
+        this.projectService.clearLayers();
     }
 
     private handleWorkflowParameters() {

@@ -1,7 +1,4 @@
 <mat-toolbar color="primary">
-    <button mat-button (click)="$event.preventDefault();close()" matTooltip="close sidenav" matTooltipPosition="after">
-        <mat-icon>keyboard_arrow_right</mat-icon>
-    </button>
     <h2 fxFlex>{{sidenavRef.getTitleStream() | async}}</h2>
     <button mat-button
             *ngIf="sidenavRef.getBackButtonComponentStream() | async"
