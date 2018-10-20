@@ -3,10 +3,11 @@ import {Component, OnInit, ChangeDetectionStrategy, AfterViewInit} from '@angula
 import {FormGroup, FormBuilder, Validators} from '@angular/forms';
 import {VectorLayer, RasterLayer} from '../../layers/layer.model';
 import {ProjectService} from '../../project/project.service';
+import {ComplexVectorSymbology} from "../../layers/symbology/symbology.model";
 
 
 @Component({
-    selector: 'wave-login',
+    selector: 'wave-ebv-selection',
     templateUrl: 'ebv-selection.component.html',
     styleUrls: ['ebv-selection.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -14,8 +15,8 @@ import {ProjectService} from '../../project/project.service';
 export class EBVComponent implements OnInit, AfterViewInit {
 
     form: FormGroup;
-    countryLayer: VectorLayer;
-    ebvLayer: RasterLayer;
+    countryLayer: VectorLayer<ComplexVectorSymbology>;
+    ebvLayer: RasterLayer<ComplexVectorSymbology>;
 
     ebv = [];
 

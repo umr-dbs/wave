@@ -141,11 +141,12 @@ import {ColorizerEditorComponent} from './colors/colorizer-editor/colorizer-edit
 import {HeatmapOperatorComponent} from './operators/dialogs/heatmap/heatmap.component';
 import {SensorSourceOperatorComponent} from './operators/dialogs/sensor-source-operator/sensor-source-operator.component';
 import {ColorBreakpointInputComponent} from './colors/color-breakpoint-component/color-breakpoint.component';
-import {TimePlotComponent} from "./operators/dialogs/time-plot-operator/time-plot-operator.component";
+import {TimePlotComponent} from './operators/dialogs/time-plot-operator/time-plot-operator.component';
 import {TerminologyLookupOperatorComponent} from './operators/dialogs/terminology-lookup/terminology-lookup.component';
 import {VectorSourceDatasetComponent} from './operators/dialogs/data-repository/vector/vector-source-dataset.component';
 import {EBVComponent} from './components/ebv-selection/ebv-selection.component';
 import {CountrySelectionComponent} from './components/country-selection/country-selection.component';
+import {TimeSelectionComponent} from './components/time-selection/time-selection.component';
 
 export function configInitializer(config: Config) {
     return () => config.load();
@@ -272,7 +273,8 @@ export function configInitializer(config: Config) {
         TerminologyLookupOperatorComponent,
         VectorSourceDatasetComponent,
         EBVComponent,
-        CountrySelectionComponent
+        CountrySelectionComponent,
+        TimeSelectionComponent
     ],
     imports: [
         BrowserModule,
@@ -337,7 +339,8 @@ export function configInitializer(config: Config) {
         SensorSourceOperatorComponent,
         TerminologyLookupOperatorComponent,
         EBVComponent,
-        CountrySelectionComponent
+        CountrySelectionComponent,
+        TimeSelectionComponent
     ],
     providers: [
         DragulaService,

@@ -131,12 +131,14 @@ export class AppComponent implements OnInit, AfterViewInit {
 
     ngAfterViewInit() {
         this.layoutService.getSidenavContentComponentStream().subscribe(sidenavConfig => {
-            this.rightSidenavContainer.load(sidenavConfig);
-            if (sidenavConfig) {
-                this.rightSidenav.open();
-            } else {
-                this.rightSidenav.close();
-            }
+            setTimeout(() => {
+                this.rightSidenavContainer.load(sidenavConfig);
+                if (sidenavConfig) {
+                    this.rightSidenav.open();
+                } else {
+                    this.rightSidenav.close();
+                }
+            }, 0);
         });
         this.layoutService.setSidenavContentComponent({component: EBVComponent})
 
