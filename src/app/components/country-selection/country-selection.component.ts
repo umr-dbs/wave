@@ -46,7 +46,7 @@ export class CountrySelectionComponent implements OnInit, OnDestroy {
 
     isLoading$ = new BehaviorSubject(true);
 
-    @Output() layer: EventEmitter<VectorLayer> = new EventEmitter();
+    @Output() layer: EventEmitter<VectorLayer<ComplexVectorSymbology>> = new EventEmitter();
 
     /*
     {

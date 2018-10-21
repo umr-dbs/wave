@@ -162,6 +162,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
         }
         this.projectService.clearLayers();
+        this.projectService.clearPlots();
     }
 
     private handleWorkflowParameters() {

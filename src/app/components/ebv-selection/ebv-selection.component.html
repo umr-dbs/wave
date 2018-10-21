@@ -7,8 +7,9 @@
         </mat-option>
     </mat-select>
     <wave-country-selection (layer)="setCountryLayer($event)"></wave-country-selection>
-    <wave-time-selection></wave-time-selection>
-    <button mat-raised-button type="submit" color="primary">
+    <wave-time-selection #time></wave-time-selection>
+    <button mat-raised-button type="submit" color="primary"
+    [disabled]="countryLayer === undefined">
         Reload
     </button>
 </form>
