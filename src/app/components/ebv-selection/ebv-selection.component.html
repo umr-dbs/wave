@@ -1,15 +1,15 @@
 <wave-sidenav-header>GEO-BON</wave-sidenav-header>
-<form [formGroup]="form" (ngSubmit)="$event.preventDefault();reload()"
-      fxLayout="column" fxLayoutAlign="space-around stretch" style="height:100%">
+<div fxLayout="column" fxLayoutAlign="space-around stretch" style="height:100%" class="form">
     <mat-select placeholder = "EBV Layer">
-        <mat-option *ngFor="let layer of ebv">
-            {{ebv}}
+        <mat-option *ngFor="let layer of (ebv | async)" [value]="layer.name" (click)="setEBVLayer(layer)">
+            {{layer.name}}
         </mat-option>
     </mat-select>
     <wave-country-selection (layer)="setCountryLayer($event)"></wave-country-selection>
     <wave-time-selection #time></wave-time-selection>
     <button mat-raised-button type="submit" color="primary"
-    [disabled]="countryLayer === undefined">
+    [disabled]="countryLayer === undefined"
+    (click)="reload()">
         Reload
     </button>
-</form>
+</div>

@@ -3,7 +3,7 @@
         <mat-card-title>Time</mat-card-title>
     </mat-card-header>
     <mat-form-field (change)="change_start($event)">
-        <input matInput type="number" [(ngModel)] = "time_start" placeholder="Start">
+        <input matInput type="number" [(ngModel)] = "time_start" placeholder="Start" [max]="time_end - 1">
     </mat-form-field>
     -
     <mat-form-field (change)="change_end($event)">
