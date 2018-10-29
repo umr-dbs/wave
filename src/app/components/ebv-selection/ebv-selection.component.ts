@@ -47,9 +47,9 @@ export class EBVComponent implements OnInit, AfterViewInit {
 
     ngOnInit() {
         this.sources.subscribe(sources => {
-            for(let i in sources) {
+            for (let i in sources) {
                 let s = sources[i];
-                if(s.name == 'GEO BON') {
+                if (s.name === 'GEO BON') {
                     this.ebv = observableOf(s.rasterLayer);
                 }
             }

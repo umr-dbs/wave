@@ -18,21 +18,21 @@ export class TimeSelectionComponent {
     constructor(private projectService: ProjectService) {}
 
     change_start(e: Event) {
-        if (e.srcElement.value > this.time_end) {
+        if (e.valueOf() > this.time_end) {
             this.time_start = this.time_end - 1;
         }
         this.setTime();
     }
 
     change_end(e: Event) {
-        if (e.srcElement.value < this.time_start) {
+        if (e.valueOf() < this.time_start) {
             this.time_end = this.time_start + 1;
         }
         this.setTime();
     }
 
     setTime() {
-        let moment = require('moment')
+        let moment = require('moment');
         this.time = new TimeInterval(moment(this.time_start + '', 'YYYY'), moment(this.time_end + '', 'YYYY'));
         this.projectService.setTime(this.time);
         console.log(this.time);
