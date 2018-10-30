@@ -63,7 +63,8 @@ export class EBVComponent implements OnInit, AfterViewInit {
         if (this.countryLayer !== null) {
             this.projectService.removeLayer(this.countryLayer);
         }
-        this.projectService.addLayer(this.countryLayer = layer);
+        this.countryLayer = layer;
+        this.projectService.addLayer(this.countryLayer);
     }
 
     setEBVLayer(channel: MappingSourceRasterLayer) {
@@ -89,13 +90,15 @@ export class EBVComponent implements OnInit, AfterViewInit {
         if (this.ebvLayer !== null) {
             this.projectService.removeLayer(this.ebvLayer);
         }
-        this.projectService.addLayer(this.ebvLayer = layer);
+        this.ebvLayer = layer;
+        this.projectService.addLayer(this.ebvLayer);
     }
 
     reload() {
         this.projectService.clearPlots();
         const countryOperator: Operator = this.countryLayer.operator;
 
+        console.log(this.countryLayer);
         const clippedLayer = this.addClip(countryOperator, this.ebvLayer);
 
         const operator_country: Operator = new Operator({
@@ -137,13 +140,13 @@ p = (
         scale_x_continuous(breaks = dates)
 )
 print(p)`,
-                resultType: clippedLayer.operator.resultType,
+                resultType: ResultTypes.RASTER,
             }),
             resultType: ResultTypes.PLOT,
             projection: clippedLayer.operator.projection,
             pointSources: undefined,
             lineSources: undefined,
-            polygonSources: [clippedLayer.operator],
+            polygonSources: clippedLayer.operator.polygonSources,
         });
         const plot_country = new Plot({
             name: 'local plot',
