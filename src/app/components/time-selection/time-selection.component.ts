@@ -1,7 +1,7 @@
 
-import {Component, OnInit, ChangeDetectionStrategy} from '@angular/core';
+import {Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef} from '@angular/core';
 import {ProjectService} from '../../project/project.service';
-import {Time, TimeInterval} from '../../time/time.model';
+import {Time, TimeInterval, TimeType} from '../../time/time.model';
 import * as moment from 'moment';
 
 @Component({
@@ -13,32 +13,48 @@ import * as moment from 'moment';
 export class TimeSelectionComponent implements OnInit {
     time_start = 2000;
     time_end = 2005;
-    start = moment.Moment = moment();
-    end = moment.Moment = moment();
+    time: Time;
 
-    constructor(private projectService: ProjectService) {}
+    constructor(private projectService: ProjectService,
+                private changeDetector: ChangeDetectorRef) {}
 
     ngOnInit() {
-        this.start.set('year', this.time_start);
-        this.start.set('day', 1);
-        this.start.set('month', 1);
-        this.start.set('hour', 0);
-        this.start.set('minute', 0);
-        this.start.set('seconds', 0);
-        this.end.set('year', this.time_end);
-        this.end.set('day', 1);
-        this.end.set('month', 1);
-        this.end.set('hour', 0);
-        this.end.set('minute', 0);
-        this.end.set('seconds', 0);
-        this.setTime();
+        this.projectService.getTimeStream().subscribe(time => {
+            this.time = time.clone();
+            this.reset();
+            console.log(time);
+        });
+    }
+
+    reset() {
+        this.time_start = this.time.getStart().year();
+        this.time_end = this.time.getEnd().year();
+        // this.start = this.start.set('months', 1);
+        // this.start = this.start.set('days', 1);
+        // this.start = this.start.set('hours', 0);
+        // this.start = this.start.set('minutes', 0);
+        // this.start = this.start.set('seconds', 0);
+        // this.end = this.end.set('months', 1);
+        // this.end = this.end.set('days', 1);
+        // this.end = this.end.set('hours', 0);
+        // this.end = this.end.set('minutes', 0);
+        // this.end = this.end.set('seconds', 0);
+        // let dict = {start: this.start.toISOString(),
+        //             end: this.end.toISOString(),
+        //             type: 'TimeInterval' as TimeType};
+        // this.time = TimeInterval.fromDict(dict);
+        // this.changeDetector.detectChanges();
     }
 
     change_start(e: Event) {
         if (e.valueOf() > this.time_end) {
             this.time_start = this.time_end - 1;
         }
-        this.start.set('year', this.time_start);
+        // this.start.set('year', this.time_start);
+        // let dict = {start: this.start.toISOString(),
+        //     end: this.end.toISOString(),
+        //     type: 'TimeInterval' as TimeType};
+        // this.time = TimeInterval.fromDict(dict);
         this.setTime();
     }
 
@@ -46,13 +62,19 @@ export class TimeSelectionComponent implements OnInit {
         if (e.valueOf() < this.time_start) {
             this.time_end = this.time_start + 1;
         }
-        this.end.set('year', this.time_end);
+        // this.end.set('year', this.time_end);
+        // let dict = {start: this.start.toISOString(),
+        //     end: this.end.toISOString(),
+        //     type: 'TimeInterval' as TimeType};
+        // this.time = TimeInterval.fromDict(dict);
         this.setTime();
     }
 
     setTime() {
-        this.time = new TimeInterval(this.start, this.end);
-        this.projectService.setTime(this.time);
-        console.log(this.time);
+        this.projectService.setTime(TimeInterval.fromDict({
+            start: this.time_start + '-01-01T00:00:00.000Z',
+            end: this.time_end + '-01-01T00:00:00.000Z',
+            type: 'TimeInterval' as TimeType
+        }));
     }
 }

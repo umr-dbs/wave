@@ -101,9 +101,11 @@ export class EBVComponent implements OnInit, AfterViewInit {
         console.log(this.countryLayer);
         const clippedLayer = this.addClip(countryOperator, this.ebvLayer);
 
+        console.log(clippedLayer.operator.resultType);
         const operator_country: Operator = new Operator({
             operatorType: new RScriptType({
                 code: `
+library(ggplot2)
 values = c()
 
 dates = ${this.time.time_start}:${this.time.time_end}
@@ -144,9 +146,7 @@ print(p)`,
             }),
             resultType: ResultTypes.PLOT,
             projection: clippedLayer.operator.projection,
-            pointSources: undefined,
-            lineSources: undefined,
-            polygonSources: clippedLayer.operator.polygonSources,
+            rasterSources: [clippedLayer.operator],
         });
         const plot_country = new Plot({
             name: 'local plot',
