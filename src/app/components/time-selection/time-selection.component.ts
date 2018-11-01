@@ -19,16 +19,17 @@ export class TimeSelectionComponent implements OnInit {
                 private changeDetector: ChangeDetectorRef) {}
 
     ngOnInit() {
-        this.projectService.getTimeStream().subscribe(time => {
-            this.time = time.clone();
-            this.reset();
-            console.log(time);
-        });
+        // this.projectService.getTimeStream().subscribe(time => {
+        //     this.time = time.clone();
+        //     this.reset();
+        //     console.log(time);
+        // });
+        this.setTime();
     }
 
     reset() {
-        this.time_start = this.time.getStart().year();
-        this.time_end = this.time.getEnd().year();
+        // this.time_start = this.time.getStart().year();
+        // this.time_end = this.time.getEnd().year();
         // this.start = this.start.set('months', 1);
         // this.start = this.start.set('days', 1);
         // this.start = this.start.set('hours', 0);

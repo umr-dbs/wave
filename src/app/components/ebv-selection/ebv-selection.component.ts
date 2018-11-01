@@ -104,10 +104,7 @@ export class EBVComponent implements OnInit, AfterViewInit {
         console.log(clippedLayer.operator.resultType);
         const operator_country: Operator = new Operator({
             operatorType: new RScriptType({
-                code: `
-library(ggplot2)
-values = c()
-
+                code: `values = c()
 dates = ${this.time.time_start}:${this.time.time_end}
 for (date in sprintf("%d-01-01", dates)) {
   t1 = as.numeric(as.POSIXct(date, format="%Y-%m-%d"))
@@ -116,18 +113,13 @@ for (date in sprintf("%d-01-01", dates)) {
   rect$t2 = t1 + 0.000001
   #print(rect$t1)
   data = mapping.loadRaster(0, rect)
-
   value = cellStats(data, stat="sum")
-
   pixels = sum(!is.na(getValues(data)))
-
   percentage = value / pixels
-
   values = c(values, percentage)
 }
 #print(values)
 df = data.frame(dates, values)
-
 p = (
         ggplot(df, aes(x=dates,y=values))
         + geom_area(fill="red", alpha=.6)
@@ -148,6 +140,7 @@ print(p)`,
             projection: clippedLayer.operator.projection,
             rasterSources: [clippedLayer.operator],
         });
+        console.log(operator_country.operatorType.code);
         const plot_country = new Plot({
             name: 'local plot',
             operator: operator_country,
