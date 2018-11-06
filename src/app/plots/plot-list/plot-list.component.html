@@ -1,38 +1,33 @@
 <p *ngIf="(projectService.getPlotStream() | async)?.length == 0" class="no-plots">
     no plots available
 </p>
-<div fxLayout="row" fxLayoutAlign="space-around stretch">
-    <mat-card *ngFor="let plot of (projectService.getPlotStream() | async)">
+<div fxLayout="row" fxLayoutAlign="space-around start">
+    <mat-card *ngFor="let plot of filter(projectService.getPlotStream() | async)"
+              fxLayout="row"
+              fxLayoutAlign="space-between">
+
         <mat-card-content *ngIf="(projectService.getPlotDataStatusStream(plot) | async) === LoadingState.LOADING">
             <mat-spinner></mat-spinner>
         </mat-card-content>
         <mat-card-content
+            style="padding-right: 1rem; margin-bottom: 0;"
             *ngIf="(projectService.getPlotDataStatusStream(plot) | async) === LoadingState.OK"
             [ngSwitch]="(projectService.getPlotDataStream(plot) | async)?.type"
-            [style.overflow]="'auto'"
-            [style.max-height] = "'100%'"
         >
-            <ng-template ngSwitchCase="text">
-                <pre [style.maxHeight.px]="cardWidth$ | async">{{(projectService.getPlotDataStream(plot) | async)?.data}}</pre>
-            </ng-template>
-            <ng-template ngSwitchCase="png">
-                <img [style.maxHeight.px]="(cardWidth$ | async) / 4"
-                     [style.maxWidth.px]="(cardWidth$ | async) / 4"
-                     src="data:image/png;base64,{{(projectService.getPlotDataStream(plot) | async)?.data}}"
+            <div [style.width.px] = "(cardHeight$ | async) - 80"
+                 [style.height.px] = "(cardHeight$ | async) - 80">
+                <img src="data:image/png;base64,{{(projectService.getPlotDataStream(plot) | async)?.data}}"
                      alt="{{plot.name}}">
-            </ng-template>
-            <ng-template ngSwitchCase="histogram">
-                <wave-histogram
-                    *ngIf="cardWidth$ | async"
-                    [data]="(projectService.getPlotDataStream(plot) | async)"
-                    [height]="(cardWidth$ | async) / 2"
-                    [width]="cardWidth$ | async"
-                    [interactable]="false"
-                ></wave-histogram>
-            </ng-template>
-            <ng-template ngSwitchDefault>
-                <pre>{{(projectService.getPlotDataStream(plot) | async)?.data}}</pre>
-            </ng-template>
+            </div>
         </mat-card-content>
+        <mat-card-actions fxLayout="column"
+                          *ngIf="(projectService.getPlotDataStatusStream(plot) | async) === LoadingState.OK">
+            <button mat-button (click)="showFullscreen(plot)"
+            ><mat-icon>fullscreen</mat-icon></button>
+            <button mat-button (click)="compareFullscreen()"
+            ><mat-icon>compare_arrows</mat-icon></button>
+            <button mat-button
+            ><mat-icon>visibility</mat-icon></button>
+        </mat-card-actions>
     </mat-card>
 </div>

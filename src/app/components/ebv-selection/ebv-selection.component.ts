@@ -104,7 +104,8 @@ export class EBVComponent implements OnInit, AfterViewInit {
         console.log(clippedLayer.operator.resultType);
         const operator_country: Operator = new Operator({
             operatorType: new RScriptType({
-                code: this.code(this.countryLayer.name + ': ' + this.ebvLayer.name),
+                // code: this.code(this.countryLayer.name, this.ebvLayer.name),
+                code: this.code(this.countryLayer.name, ''),
                 resultType: ResultTypes.PLOT,
             }),
             resultType: ResultTypes.PLOT,
@@ -121,7 +122,8 @@ export class EBVComponent implements OnInit, AfterViewInit {
 
         const operator_global: Operator = new Operator({
             operatorType: new RScriptType({
-                code: this.code('Global: ' + this.ebvLayer.name),
+                // code: this.code('Global', this.ebvLayer.name),
+                code: this.code('Global', ''),
                 resultType: ResultTypes.PLOT,
             }),
             resultType: ResultTypes.PLOT,
@@ -134,9 +136,11 @@ export class EBVComponent implements OnInit, AfterViewInit {
         });
 
         this.projectService.addPlot(plot_global);
+
+        this.addComparisonPlot(clippedLayer, this.countryLayer.name, this.ebvLayer.name);
     }
 
-    code(title: string): string {
+    code(title: string, layer_name: string): string {
         return `library(ggplot2);
 values = c()
 dates = ${this.time.time_start}:${this.time.time_end}
@@ -160,13 +164,67 @@ p = (
         + geom_point()
         + expand_limits(y=0)
         + xlab("Year")
-        + ylab("Loss")
+        + ylab(\"${layer_name}\")
         + ggtitle(\"${title}\")
         + theme(text = element_text(size=20)) +
         scale_y_continuous(labels = scales::percent) +
         scale_x_continuous(breaks = dates)
 )
 print(p)`;
+    }
+
+    addComparisonPlot(clippedLayer: Layer, title: string, layer_name: string) {
+        const operator: Operator = new Operator({
+            operatorType: new RScriptType({
+                code: `library(ggplot2);
+values0 = c()
+values1 = c()
+dates = ${this.time.time_start}:${this.time.time_end}
+for (date in sprintf("%d-01-01", dates)) {
+  t1 = as.numeric(as.POSIXct(date, format="%Y-%m-%d"))
+  rect = mapping.qrect
+  rect$t1 = t1
+  rect$t2 = t1 + 0.000001
+  #print(rect$t1)
+  data0 = mapping.loadRaster(0, rect)
+  value = cellStats(data0, stat="sum")
+  pixels = sum(!is.na(getValues(data0)))
+  percentage = value / pixels
+  values0 = c(values0, percentage)
+  data1 = mapping.loadRaster(1, rect)
+  value = cellStats(data1, stat="sum")
+  pixels = sum(!is.na(getValues(data1)))
+  percentage = value / pixels
+  values1 = c(values1, percentage)
+}
+df = data.frame(dates, global = values1, ${title} = values0)
+df = reshape2::melt(df, id.var='dates')
+p = (
+        ggplot(df, aes(x = dates, y = value, col = variable, fill = variable))
+        #+ geom_area()
+        + geom_line()
+        + geom_point()
+        + expand_limits(y=0)
+        + xlab("Year")
+        + ylab(\"${layer_name}\")
+        + ggtitle("Comparison: ${title} - global")
+        + theme(text = element_text(size=20)) +
+        scale_y_continuous(labels = scales::percent) +
+        scale_x_continuous(breaks = dates)
+)
+print(p)`,
+                resultType: ResultTypes.PLOT,
+            }),
+            resultType: ResultTypes.PLOT,
+            projection: clippedLayer.operator.projection,
+            rasterSources: [clippedLayer.operator, this.ebvLayer.operator],
+        });
+        const plot = new Plot({
+            name: 'Comparison',
+            operator: operator,
+        });
+
+        this.projectService.addPlot(plot);
     }
 
     addClip(polygonOperator: Operator, rasterLayer: RasterLayer<RasterSymbology>): RasterLayer<RasterSymbology> {

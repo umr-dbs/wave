@@ -1,7 +1,7 @@
 
 import {BehaviorSubject, Subscription} from 'rxjs';
 import {first, filter} from 'rxjs/operators';
-import {AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit} from '@angular/core';
+import {AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, Input, OnDestroy, OnInit} from '@angular/core';
 import {ProjectService} from '../../project/project.service';
 import {LoadingState} from '../../project/loading-state.model';
 import {MatDialog} from '@angular/material';
@@ -37,10 +37,13 @@ export class PlotListComponent implements OnInit, AfterViewInit, OnDestroy {
     cardWidth$: BehaviorSubject<number> = new BehaviorSubject(undefined);
     private subsriptions: Array<Subscription> = [];
 
+    @Input() cardHeight$: BehaviorSubject<number>;
+
     constructor(public projectService: ProjectService,
                 private layoutService: LayoutService,
                 public dialog: MatDialog,
                 private elementRef: ElementRef) {
+        this.layoutService = layoutService;
     }
 
     ngOnInit() {
@@ -54,7 +57,7 @@ export class PlotListComponent implements OnInit, AfterViewInit, OnDestroy {
                 .subscribe(() => {
                     setTimeout(() => {
                         const cardContent = this.elementRef.nativeElement.querySelector('mat-card');
-                        const width = parseInt(getComputedStyle(cardContent).width, 10);
+                        const width = parseInt(getComputedStyle(cardContent).height, 10);
                         this.cardWidth$.next(width);
                     });
                 })
@@ -90,5 +93,29 @@ export class PlotListComponent implements OnInit, AfterViewInit, OnDestroy {
                 maxWidth: '100vw',
             },
         );
+    }
+
+    compareFullscreen() {
+        let comparison: Plot;
+        this.projectService.getPlotStream().subscribe(
+            p => p.forEach(plot => {
+                if (plot.name === 'Comparison') {
+                    comparison = plot;
+                }
+            })
+        );
+        this.dialog.open(
+            PlotDetailViewComponent,
+            {
+                data: comparison,
+                maxHeight: '100vh',
+                maxWidth: '100vw',
+            },
+        );
+    }
+
+    filter(plots: Plot[]): Plot[] {
+        if (plots === null) return null;
+        return plots.filter(plot => plot.name !== 'Comparison');
     }
 }

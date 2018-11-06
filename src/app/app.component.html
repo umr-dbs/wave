@@ -50,9 +50,8 @@
             </ng-template>
         </wave-ol-map>
     </div>
-    <div
-        [style.max-height.px]="bottomContainerHeight$ | async"
+    <div [style.height.px]="bottomContainerHeight$ | async"
     >
-        <wave-plot-list></wave-plot-list>
+        <wave-plot-list [cardHeight$]="bottomContainerHeight$"></wave-plot-list>
     </div>
 </mat-sidenav-container>
