@@ -49,7 +49,7 @@ export class LayoutService {
     /**
      * What is the height of the layer detail view as a percentage of the available space.
      */
-    private layerDetailViewHeightPercentage$: BehaviorSubject<number> = new BehaviorSubject(2 / 5);
+    private layerDetailViewHeightPercentage$: BehaviorSubject<number> = new BehaviorSubject(5 / 11);
 
     /**
      *  Sidenav content

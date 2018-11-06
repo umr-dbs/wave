@@ -1,25 +1,25 @@
 <p *ngIf="(projectService.getPlotStream() | async)?.length == 0" class="no-plots">
     no plots available
 </p>
-<div fxLayout="row" fxLayoutAlign="space-around center">
+<div fxLayout="row" fxLayoutAlign="space-around stretch">
     <mat-card *ngFor="let plot of (projectService.getPlotStream() | async)">
-        <mat-card-header>
-            <img mat-card-avatar [src]="plot.operator.operatorType.getIconUrl()" [alt]="plot.operator.resultType.toString()">
-            <mat-card-title>{{plot.name}}</mat-card-title>
-            <mat-card-subtitle>{{plot.operator.operatorType.toString()}}</mat-card-subtitle>
-        </mat-card-header>
         <mat-card-content *ngIf="(projectService.getPlotDataStatusStream(plot) | async) === LoadingState.LOADING">
             <mat-spinner></mat-spinner>
         </mat-card-content>
         <mat-card-content
             *ngIf="(projectService.getPlotDataStatusStream(plot) | async) === LoadingState.OK"
             [ngSwitch]="(projectService.getPlotDataStream(plot) | async)?.type"
+            [style.overflow]="'auto'"
+            [style.max-height] = "'100%'"
         >
             <ng-template ngSwitchCase="text">
                 <pre [style.maxHeight.px]="cardWidth$ | async">{{(projectService.getPlotDataStream(plot) | async)?.data}}</pre>
             </ng-template>
             <ng-template ngSwitchCase="png">
-                <img src="data:image/png;base64,{{(projectService.getPlotDataStream(plot) | async)?.data}}" alt="{{plot.name}}">
+                <img [style.maxHeight.px]="(cardWidth$ | async) / 4"
+                     [style.maxWidth.px]="(cardWidth$ | async) / 4"
+                     src="data:image/png;base64,{{(projectService.getPlotDataStream(plot) | async)?.data}}"
+                     alt="{{plot.name}}">
             </ng-template>
             <ng-template ngSwitchCase="histogram">
                 <wave-histogram

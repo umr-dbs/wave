@@ -104,37 +104,8 @@ export class EBVComponent implements OnInit, AfterViewInit {
         console.log(clippedLayer.operator.resultType);
         const operator_country: Operator = new Operator({
             operatorType: new RScriptType({
-                code: `values = c()
-dates = ${this.time.time_start}:${this.time.time_end}
-for (date in sprintf("%d-01-01", dates)) {
-  t1 = as.numeric(as.POSIXct(date, format="%Y-%m-%d"))
-  rect = mapping.qrect
-  rect$t1 = t1
-  rect$t2 = t1 + 0.000001
-  #print(rect$t1)
-  data = mapping.loadRaster(0, rect)
-  value = cellStats(data, stat="sum")
-  pixels = sum(!is.na(getValues(data)))
-  percentage = value / pixels
-  values = c(values, percentage)
-}
-#print(values)
-df = data.frame(dates, values)
-p = (
-        ggplot(df, aes(x=dates,y=values))
-        + geom_area(fill="red", alpha=.6)
-        + geom_line()
-        + geom_point()
-        + expand_limits(y=0)
-        + xlab("Year")
-        + ylab("Loss")
-        + ggtitle("Forest Loss over Time")
-        + theme(text = element_text(size=20)) +
-        scale_y_continuous(labels = scales::percent) +
-        scale_x_continuous(breaks = dates)
-)
-print(p)`,
-                resultType: ResultTypes.RASTER,
+                code: this.code(this.countryLayer.name + ': ' + this.ebvLayer.name),
+                resultType: ResultTypes.PLOT,
             }),
             resultType: ResultTypes.PLOT,
             projection: clippedLayer.operator.projection,
@@ -150,7 +121,24 @@ print(p)`,
 
         const operator_global: Operator = new Operator({
             operatorType: new RScriptType({
-                code: `values = c()
+                code: this.code('Global: ' + this.ebvLayer.name),
+                resultType: ResultTypes.PLOT,
+            }),
+            resultType: ResultTypes.PLOT,
+            projection: this.ebvLayer.operator.projection,
+            rasterSources: [this.ebvLayer.operator],
+        });
+        const plot_global = new Plot({
+            name: 'global plot',
+            operator: operator_global,
+        });
+
+        this.projectService.addPlot(plot_global);
+    }
+
+    code(title: string): string {
+        return `library(ggplot2);
+values = c()
 dates = ${this.time.time_start}:${this.time.time_end}
 for (date in sprintf("%d-01-01", dates)) {
   t1 = as.numeric(as.POSIXct(date, format="%Y-%m-%d"))
@@ -164,7 +152,6 @@ for (date in sprintf("%d-01-01", dates)) {
   percentage = value / pixels
   values = c(values, percentage)
 }
-#print(values)
 df = data.frame(dates, values)
 p = (
         ggplot(df, aes(x=dates,y=values))
@@ -174,24 +161,12 @@ p = (
         + expand_limits(y=0)
         + xlab("Year")
         + ylab("Loss")
-        + ggtitle("Forest Loss over Time")
+        + ggtitle(\"${title}\")
         + theme(text = element_text(size=20)) +
         scale_y_continuous(labels = scales::percent) +
         scale_x_continuous(breaks = dates)
 )
-print(p)`,
-                resultType: ResultTypes.RASTER,
-            }),
-            resultType: ResultTypes.PLOT,
-            projection: this.ebvLayer.operator.projection,
-            rasterSources: [this.ebvLayer.operator],
-        });
-        const plot_global = new Plot({
-            name: 'global plot',
-            operator: operator_global,
-        });
-
-        this.projectService.addPlot(plot_global);
+print(p)`;
     }
 
     addClip(polygonOperator: Operator, rasterLayer: RasterLayer<RasterSymbology>): RasterLayer<RasterSymbology> {
