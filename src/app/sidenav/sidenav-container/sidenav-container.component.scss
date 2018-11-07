@@ -27,3 +27,30 @@ div, mat-toolbar {
 div {
     overflow: auto;
 }
+
+.geobon-logo {
+    text-align: center;
+
+    @media (max-width: 1480px) {
+        flex: 1;
+    }
+
+    mat-icon {
+        vertical-align: baseline;
+        height: 1.5rem;
+        width: 100px;
+        margin-top: 0.75rem;
+        margin-left: 0;
+    }
+
+    .title {
+        font-family: 'Pacifico', cursive;
+    }
+
+    .subtitle {
+        font-size: 0.5rem;
+        position: absolute;
+        margin-top: -1.25rem;
+        margin-left: 0.5rem;
+    }
+}

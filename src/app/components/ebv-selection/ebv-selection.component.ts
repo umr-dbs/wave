@@ -173,7 +173,7 @@ p = (
 print(p)`;
     }
 
-    addComparisonPlot(clippedLayer: Layer, title: string, layer_name: string) {
+    addComparisonPlot(clippedLayer: RasterLayer<RasterSymbology>, title: string, layer_name: string) {
         const operator: Operator = new Operator({
             operatorType: new RScriptType({
                 code: `library(ggplot2);
