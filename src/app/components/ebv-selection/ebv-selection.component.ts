@@ -187,10 +187,22 @@ for (date in sprintf("%d-01-01", dates)) {
   rect$t2 = t1 + 0.000001
   #print(rect$t1)
   data0 = mapping.loadRaster(0, rect)
+  ex = attributes(attributes(data0)$extent)
+  rect$x1 = ex$xmin
+  rect$x2 = ex$xmax
+  rect$y1 = ex$ymin
+  rect$y2 = ex$ymax
+  data0 = mapping.loadRaster(0, rect)
   value = cellStats(data0, stat="sum")
   pixels = sum(!is.na(getValues(data0)))
   percentage = value / pixels
   values0 = c(values0, percentage)
+  data1 = mapping.loadRaster(1, rect)
+  ex = attributes(attributes(data1)$extent)
+  rect$x1 = ex$xmin
+  rect$x2 = ex$xmax
+  rect$y1 = ex$ymin
+  rect$y2 = ex$ymax
   data1 = mapping.loadRaster(1, rect)
   value = cellStats(data1, stat="sum")
   pixels = sum(!is.na(getValues(data1)))
