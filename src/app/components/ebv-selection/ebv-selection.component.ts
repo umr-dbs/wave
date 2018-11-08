@@ -105,12 +105,68 @@ export class EBVComponent implements OnInit, AfterViewInit {
         const operator_country: Operator = new Operator({
             operatorType: new RScriptType({
                 // code: this.code(this.countryLayer.name, this.ebvLayer.name),
-                code: this.code(this.countryLayer.name, ''),
+                code: `library(ggplot2);
+values = c()
+rect = mapping.qrect
+if (rect$crs == "EPSG:3857") {
+  xmin = -20026376.39
+  xmax = 20026376.39
+  ymin = -20048966.10
+  ymax = 20048966.10
+}else {
+  xmin = -180
+  xmax = 180
+  ymin = -90
+  ymax = 180
+}
+xres = rect$xres
+yres = rect$yres
+rect$xres = 0
+rect$yres = 0
+rect$x1 = xmin
+rect$x2 = xmax
+rect$y1 = ymin
+rect$y2 = ymax
+c_layer = mapping.loadPolygons(0, rect)
+rect$xres = xres
+rect$yres = yres
+c_extent = extent(c_layer)
+dates = ${this.time.time_start}:${this.time.time_end}
+for (date in sprintf("%d-01-01", dates)) {
+  t1 = as.numeric(as.POSIXct(date, format="%Y-%m-%d"))
+  rect$x1 = xmin(c_extent)
+  rect$x2 = xmax(c_extent)
+  rect$y1 = ymin(c_extent)
+  rect$y2 = ymax(c_extent)
+  rect$t1 = t1
+  rect$t2 = t1 + 0.000001
+  data = mapping.loadRaster(0, rect)
+  value = cellStats(data, stat="sum")
+  pixels = sum(!is.na(getValues(data)))
+  percentage = value / pixels
+  values = c(values, percentage)
+}
+df = data.frame(dates, values)
+p = (
+        ggplot(df, aes(x=dates,y=values))
+        + geom_area(fill="red", alpha=.6)
+        + geom_line()
+        + geom_point()
+        + expand_limits(y=0)
+        + xlab("Year")
+        + ylab("")
+        + ggtitle(\"${this.countryLayer.name}\")
+        + theme(text = element_text(size=20)) +
+        scale_y_continuous(labels = scales::percent) +
+        scale_x_continuous(breaks = dates)
+)
+print(p)`,
                 resultType: ResultTypes.PLOT,
             }),
             resultType: ResultTypes.PLOT,
             projection: clippedLayer.operator.projection,
             rasterSources: [clippedLayer.operator],
+            polygonSources: [this.countryLayer.operator.getProjectedOperator(clippedLayer.operator.projection)],
         });
         const plot_country = new Plot({
             name: 'local plot',
@@ -123,7 +179,50 @@ export class EBVComponent implements OnInit, AfterViewInit {
         const operator_global: Operator = new Operator({
             operatorType: new RScriptType({
                 // code: this.code('Global', this.ebvLayer.name),
-                code: this.code('Global', ''),
+                code: `library(ggplot2);
+rect = mapping.qrect
+if (rect$crs == "EPSG:3857") {
+  xmin = -20026376.39
+  xmax = 20026376.39
+  ymin = -20048966.10
+  ymax = 20048966.10
+}else {
+  xmin = -180
+  xmax = 180
+  ymin = -90
+  ymax = 180
+}
+values = c()
+rect$x1 = xmin
+rect$x2 = xmax
+rect$y1 = ymin
+rect$y2 = ymax
+dates = ${this.time.time_start}:${this.time.time_end}
+for (date in sprintf("%d-01-01", dates)) {
+  t1 = as.numeric(as.POSIXct(date, format="%Y-%m-%d"))
+  rect$t1 = t1
+  rect$t2 = t1 + 0.000001
+  data = mapping.loadRaster(0, rect)
+  value = cellStats(data, stat="sum")
+  pixels = sum(!is.na(getValues(data)))
+  percentage = value / pixels
+  values = c(values, percentage)
+}
+  df = data.frame(dates, values)
+  p = (
+    ggplot(df, aes(x=dates,y=values))
+    + geom_area(fill="red", alpha=.6)
+    + geom_line()
+    + geom_point()
+    + expand_limits(y=0)
+    + xlab("Year")
+    + ylab("")
+    + ggtitle("Global")
+    + theme(text = element_text(size=20)) +
+      scale_y_continuous(labels = scales::percent) +
+      scale_x_continuous(breaks = dates)
+  )
+print(p)`,
                 resultType: ResultTypes.PLOT,
             }),
             resultType: ResultTypes.PLOT,
@@ -142,8 +241,8 @@ export class EBVComponent implements OnInit, AfterViewInit {
 
     code(title: string, layer_name: string): string {
         return `library(ggplot2);
-values = c()
-dates = ${this.time.time_start}:${this.time.time_end}
+            values = c()
+            dates = ${this.time.time_start}:${this.time.time_end}
 for (date in sprintf("%d-01-01", dates)) {
   t1 = as.numeric(as.POSIXct(date, format="%Y-%m-%d"))
   rect = mapping.qrect
@@ -176,33 +275,52 @@ print(p)`;
     addComparisonPlot(clippedLayer: RasterLayer<RasterSymbology>, title: string, layer_name: string) {
         const operator: Operator = new Operator({
             operatorType: new RScriptType({
-                code: `library(ggplot2);
+                code: `library(ggplot2)
 values0 = c()
 values1 = c()
+rect = mapping.qrect
+if (rect$crs == "EPSG:3857") {
+  xmin = -20026376.39
+  xmax = 20026376.39
+  ymin = -20048966.10
+  ymax = 20048966.10
+}else {
+  xmin = -180
+  xmax = 180
+  ymin = -90
+  ymax = 180
+}
+xres = rect$xres
+yres = rect$yres
+rect$xres = 0
+rect$yres = 0
+rect$x1 = xmin
+rect$x2 = xmax
+rect$y1 = ymin
+rect$y2 = ymax
+c_layer = mapping.loadPolygons(0, rect)
+rect$xres = xres
+rect$yres = yres
+c_extent = extent(c_layer)
 dates = ${this.time.time_start}:${this.time.time_end}
 for (date in sprintf("%d-01-01", dates)) {
   t1 = as.numeric(as.POSIXct(date, format="%Y-%m-%d"))
   rect = mapping.qrect
   rect$t1 = t1
   rect$t2 = t1 + 0.000001
-  #print(rect$t1)
-  data0 = mapping.loadRaster(0, rect)
-  ex = attributes(attributes(data0)$extent)
-  rect$x1 = ex$xmin
-  rect$x2 = ex$xmax
-  rect$y1 = ex$ymin
-  rect$y2 = ex$ymax
+  rect$x1 = xmin(c_extent)
+  rect$x2 = xmax(c_extent)
+  rect$y1 = ymin(c_extent)
+  rect$y2 = ymax(c_extent)
   data0 = mapping.loadRaster(0, rect)
   value = cellStats(data0, stat="sum")
   pixels = sum(!is.na(getValues(data0)))
   percentage = value / pixels
   values0 = c(values0, percentage)
-  data1 = mapping.loadRaster(1, rect)
-  ex = attributes(attributes(data1)$extent)
-  rect$x1 = ex$xmin
-  rect$x2 = ex$xmax
-  rect$y1 = ex$ymin
-  rect$y2 = ex$ymax
+  rect$x1 = xmin
+  rect$x2 = xmax
+  rect$y1 = ymin
+  rect$y2 = ymax
   data1 = mapping.loadRaster(1, rect)
   value = cellStats(data1, stat="sum")
   pixels = sum(!is.na(getValues(data1)))
@@ -230,6 +348,7 @@ print(p)`,
             resultType: ResultTypes.PLOT,
             projection: clippedLayer.operator.projection,
             rasterSources: [clippedLayer.operator, this.ebvLayer.operator],
+            polygonSources: [this.countryLayer.operator.getProjectedOperator(this.ebvLayer.operator.projection)],
         });
         const plot = new Plot({
             name: 'Comparison',
