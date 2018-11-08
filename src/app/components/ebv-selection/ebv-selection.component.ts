@@ -59,7 +59,7 @@ export class EBVComponent implements OnInit, AfterViewInit {
     ngAfterViewInit() {
     }
 
-    setCountryLayer(layer: VectorLayer<ComplexVectorSymbology>, operator: Operator) {
+    setCountryLayer(layer: VectorLayer<ComplexVectorSymbology>) {
         if (this.countryLayer !== null) {
             this.projectService.removeLayer(this.countryLayer);
         }
