@@ -11,8 +11,8 @@ import * as moment from 'moment';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TimeSelectionComponent implements OnInit {
-    time_start = 2000;
-    time_end = 2005;
+    time_start = 2001;
+    time_end = 2007;
     time: Time;
 
     constructor(private projectService: ProjectService,
@@ -51,6 +51,9 @@ export class TimeSelectionComponent implements OnInit {
         if (e.valueOf() > this.time_end) {
             this.time_start = this.time_end - 1;
         }
+        if (e.valueOf() < 2001) {
+            this.time_start = 2001;
+        }
         // this.start.set('year', this.time_start);
         // let dict = {start: this.start.toISOString(),
         //     end: this.end.toISOString(),
@@ -62,6 +65,9 @@ export class TimeSelectionComponent implements OnInit {
     change_end(e: Event) {
         if (e.valueOf() < this.time_start) {
             this.time_end = this.time_start + 1;
+        }
+        if (e.valueOf() > 2012) {
+            this.time_end = 2012;
         }
         // this.end.set('year', this.time_end);
         // let dict = {start: this.start.toISOString(),
@@ -77,5 +83,6 @@ export class TimeSelectionComponent implements OnInit {
             end: this.time_end + '-01-01T00:00:00.000Z',
             type: 'TimeInterval' as TimeType
         }));
+        this.changeDetector.detectChanges();
     }
 }
