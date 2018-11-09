@@ -20,6 +20,7 @@ import {
 } from '../../operators/types/textual-attribute-filter-type.model';
 import {ComplexVectorSymbology} from '../../layers/symbology/symbology.model';
 import {DataSource} from '@angular/cdk/collections';
+import {Color, RgbaTuple} from '../../colors/color';
 
 
 function nameComparator(a: string, b: string): number {
@@ -197,7 +198,8 @@ Sean Gilles did some clean up and made some enhancements.`,
 
     addLayer(name: string, operator: Operator) {
         let symbology = ComplexVectorSymbology.createSimpleSymbology({
-            fillRGBA: this.randomColorService.getRandomColorRgba(),
+            fillRGBA: Color.fromRgbaLike([0,0,0,0] as RgbaTuple),
+            strokeRGBA: Color.fromRgbaLike([255, 0, 0, 255] as RgbaTuple)
         });
 
         const layer = new VectorLayer({

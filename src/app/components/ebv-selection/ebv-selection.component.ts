@@ -386,7 +386,6 @@ print(p)`,
             units: rasterOperator.units,
             rasterSources: [rasterOperator, rasterizePolygonOperator],
         });
-
         const layer = new RasterLayer({
             name: name,
             operator: expressionOperator,
@@ -394,6 +393,7 @@ print(p)`,
         });
 
         this.projectService.addLayer(layer);
+        this.projectService.changeLayer(layer, {visible: false})
         return layer;
     }
 
