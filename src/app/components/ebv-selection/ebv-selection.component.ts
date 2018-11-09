@@ -53,7 +53,7 @@ export class EBVComponent implements OnInit, AfterViewInit {
                     this.ebv = observableOf(s.rasterLayer);
                 }
             }
-        })
+        });
     }
 
     ngAfterViewInit() {

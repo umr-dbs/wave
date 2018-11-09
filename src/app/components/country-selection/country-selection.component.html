@@ -1,6 +1,6 @@
 <mat-select *ngIf="!(isLoading$ | async)" placeholder = "Country">
     <mat-option
-        *ngFor="let entry of (tableEntries.connect() | async)"
+        *ngFor="let entry of (filteredEntries$ | async)"
         (click)="addLayer(entry[sourceIdColumn], createFilterOperator(entry[sourceIdColumn]))"
         [value]="entry[sourceIdColumn]"
     >
