@@ -1,4 +1,4 @@
-import {Component, OnInit, ChangeDetectionStrategy, AfterViewInit, ViewChild} from '@angular/core';
+import {Component, OnInit, ChangeDetectionStrategy, AfterViewInit, ViewChild, Input} from '@angular/core';
 import {FormGroup, FormBuilder, Validators} from '@angular/forms';
 import {VectorLayer, RasterLayer, Layer} from '../../layers/layer.model';
 import {ProjectService} from '../../project/project.service';
@@ -10,7 +10,7 @@ import {Operator} from "../../operators/operator.model";
 import {ResultTypes} from "../../operators/result-type.model";
 import {Plot} from "../../plots/plot.model";
 import {RScriptType} from "../../operators/types/r-script-type.model";
-import {TimeSelectionComponent} from "../time-selection/time-selection.component";
+import {TimeStampSelectionComponent} from "../time-selection/stamp-selection/time-stamp-selection.component";
 import {RasterizePolygonType} from '../../operators/types/rasterize-polygon-type.model';
 import {ExpressionType} from '../../operators/types/expression-type.model';
 import {UserService} from '../../users/user.service';
@@ -22,6 +22,8 @@ import {GdalSourceType} from '../../operators/types/gdal-source-type.model';
 import {SourceDatasetComponent} from '../../operators/dialogs/data-repository/raster/source-dataset.component';
 import {Projection, Projections} from '../../operators/projection.model';
 import {DataType, DataTypes} from '../../operators/datatype.model';
+import {TimeRangeSelectionComponent} from '../time-selection/range-selection/time-range-selection.component';
+import {LayoutService} from '../../layout.service';
 
 
 @Component({
@@ -37,11 +39,14 @@ export class EBVComponent implements OnInit, AfterViewInit {
 
     sources: Observable<Array<MappingSource>>;
     ebv: Observable<Array<MappingSourceRasterLayer>>;
-    @ViewChild('time') time: TimeSelectionComponent;
+    @ViewChild('time') time: TimeRangeSelectionComponent;
+    bottomContainerHeight$ = new BehaviorSubject<number>(0);
+    windowHeight$ = new BehaviorSubject<number>(window.innerHeight);
 
     constructor(private formBuilder: FormBuilder,
                 private projectService: ProjectService,
-                private userService: UserService) {
+                private userService: UserService,
+                private layoutService: LayoutService) {
         this.sources = this.userService.getRasterSourcesStream();
     }
 
@@ -54,6 +59,7 @@ export class EBVComponent implements OnInit, AfterViewInit {
                 }
             }
         });
+        this.bottomContainerHeight$.next(LayoutService.calculateLayerDetailViewHeight(4 / 10, window.innerHeight));
     }
 
     ngAfterViewInit() {
@@ -101,140 +107,140 @@ export class EBVComponent implements OnInit, AfterViewInit {
         console.log(this.countryLayer);
         const clippedLayer = this.addClip(countryOperator, this.ebvLayer);
 
-        console.log(clippedLayer.operator.resultType);
-        const operator_country: Operator = new Operator({
-            operatorType: new RScriptType({
-                // code: this.code(this.countryLayer.name, this.ebvLayer.name),
-                code: `library(ggplot2);
-values = c()
-rect = mapping.qrect
-if (rect$crs == "EPSG:3857") {
-  xmin = -20026376.39
-  xmax = 20026376.39
-  ymin = -20048966.10
-  ymax = 20048966.10
-}else {
-  xmin = -180
-  xmax = 180
-  ymin = -90
-  ymax = 180
-}
-xres = rect$xres
-yres = rect$yres
-rect$xres = 0
-rect$yres = 0
-rect$x1 = xmin
-rect$x2 = xmax
-rect$y1 = ymin
-rect$y2 = ymax
-c_layer = mapping.loadPolygons(0, rect)
-rect$xres = xres
-rect$yres = yres
-c_extent = extent(c_layer)
-dates = ${this.time.time_start}:${this.time.time_end}
-for (date in sprintf("%d-01-01", dates)) {
-  t1 = as.numeric(as.POSIXct(date, format="%Y-%m-%d"))
-  rect$x1 = xmin(c_extent)
-  rect$x2 = xmax(c_extent)
-  rect$y1 = ymin(c_extent)
-  rect$y2 = ymax(c_extent)
-  rect$t1 = t1
-  rect$t2 = t1 + 0.000001
-  data = mapping.loadRaster(0, rect)
-  value = cellStats(data, stat="sum")
-  pixels = sum(!is.na(getValues(data)))
-  percentage = value / pixels
-  values = c(values, percentage)
-}
-df = data.frame(dates, values)
-p = (
-        ggplot(df, aes(x=dates,y=values))
-        + geom_area(fill="red", alpha=.6)
-        + geom_line()
-        + geom_point()
-        + expand_limits(y=0)
-        + xlab("Year")
-        + ylab("")
-        + ggtitle(\"${this.countryLayer.name}\")
-        + theme(text = element_text(size=20)) +
-        scale_y_continuous(labels = scales::percent) +
-        scale_x_continuous(breaks = dates)
-)
-print(p)`,
-                resultType: ResultTypes.PLOT,
-            }),
-            resultType: ResultTypes.PLOT,
-            projection: clippedLayer.operator.projection,
-            rasterSources: [clippedLayer.operator],
-            polygonSources: [this.countryLayer.operator.getProjectedOperator(clippedLayer.operator.projection)],
-        });
-        const plot_country = new Plot({
-            name: 'local plot',
-            operator: operator_country,
-        });
-
-        this.projectService.addPlot(plot_country);
-
-
-        const operator_global: Operator = new Operator({
-            operatorType: new RScriptType({
-                // code: this.code('Global', this.ebvLayer.name),
-                code: `library(ggplot2);
-rect = mapping.qrect
-if (rect$crs == "EPSG:3857") {
-  xmin = -20026376.39
-  xmax = 20026376.39
-  ymin = -20048966.10
-  ymax = 20048966.10
-}else {
-  xmin = -180
-  xmax = 180
-  ymin = -90
-  ymax = 180
-}
-values = c()
-rect$x1 = xmin
-rect$x2 = xmax
-rect$y1 = ymin
-rect$y2 = ymax
-dates = ${this.time.time_start}:${this.time.time_end}
-for (date in sprintf("%d-01-01", dates)) {
-  t1 = as.numeric(as.POSIXct(date, format="%Y-%m-%d"))
-  rect$t1 = t1
-  rect$t2 = t1 + 0.000001
-  data = mapping.loadRaster(0, rect)
-  value = cellStats(data, stat="sum")
-  pixels = sum(!is.na(getValues(data)))
-  percentage = value / pixels
-  values = c(values, percentage)
-}
-  df = data.frame(dates, values)
-  p = (
-    ggplot(df, aes(x=dates,y=values))
-    + geom_area(fill="red", alpha=.6)
-    + geom_line()
-    + geom_point()
-    + expand_limits(y=0)
-    + xlab("Year")
-    + ylab("")
-    + ggtitle("Global")
-    + theme(text = element_text(size=20)) +
-      scale_y_continuous(labels = scales::percent) +
-      scale_x_continuous(breaks = dates)
-  )
-print(p)`,
-                resultType: ResultTypes.PLOT,
-            }),
-            resultType: ResultTypes.PLOT,
-            projection: this.ebvLayer.operator.projection,
-            rasterSources: [this.ebvLayer.operator],
-        });
-        const plot_global = new Plot({
-            name: 'global plot',
-            operator: operator_global,
-        });
-
-        this.projectService.addPlot(plot_global);
+//         console.log(clippedLayer.operator.resultType);
+//         const operator_country: Operator = new Operator({
+//             operatorType: new RScriptType({
+//                 // code: this.code(this.countryLayer.name, this.ebvLayer.name),
+//                 code: `library(ggplot2);
+// values = c()
+// rect = mapping.qrect
+// if (rect$crs == "EPSG:3857") {
+//   xmin = -20026376.39
+//   xmax = 20026376.39
+//   ymin = -20048966.10
+//   ymax = 20048966.10
+// }else {
+//   xmin = -180
+//   xmax = 180
+//   ymin = -90
+//   ymax = 180
+// }
+// xres = rect$xres
+// yres = rect$yres
+// rect$xres = 0
+// rect$yres = 0
+// rect$x1 = xmin
+// rect$x2 = xmax
+// rect$y1 = ymin
+// rect$y2 = ymax
+// c_layer = mapping.loadPolygons(0, rect)
+// rect$xres = xres
+// rect$yres = yres
+// c_extent = extent(c_layer)
+// dates = ${this.time.time_start}:${this.time.time_end}
+// for (date in sprintf("%d-01-01", dates)) {
+//   t1 = as.numeric(as.POSIXct(date, format="%Y-%m-%d"))
+//   rect$x1 = xmin(c_extent)
+//   rect$x2 = xmax(c_extent)
+//   rect$y1 = ymin(c_extent)
+//   rect$y2 = ymax(c_extent)
+//   rect$t1 = t1
+//   rect$t2 = t1 + 0.000001
+//   data = mapping.loadRaster(0, rect)
+//   value = cellStats(data, stat="sum")
+//   pixels = sum(!is.na(getValues(data)))
+//   percentage = value / pixels
+//   values = c(values, percentage)
+// }
+// df = data.frame(dates, values)
+// p = (
+//         ggplot(df, aes(x=dates,y=values))
+//         + geom_area(fill="red", alpha=.6)
+//         + geom_line()
+//         + geom_point()
+//         + expand_limits(y=0)
+//         + xlab("Year")
+//         + ylab("")
+//         + ggtitle(\"${this.countryLayer.name}\")
+//         + theme(text = element_text(size=20)) +
+//         scale_y_continuous(labels = scales::percent) +
+//         scale_x_continuous(breaks = dates)
+// )
+// print(p)`,
+//                 resultType: ResultTypes.PLOT,
+//             }),
+//             resultType: ResultTypes.PLOT,
+//             projection: clippedLayer.operator.projection,
+//             rasterSources: [clippedLayer.operator],
+//             polygonSources: [this.countryLayer.operator.getProjectedOperator(clippedLayer.operator.projection)],
+//         });
+//         const plot_country = new Plot({
+//             name: 'local plot',
+//             operator: operator_country,
+//         });
+//
+//         this.projectService.addPlot(plot_country);
+//
+//
+//         const operator_global: Operator = new Operator({
+//             operatorType: new RScriptType({
+//                 // code: this.code('Global', this.ebvLayer.name),
+//                 code: `library(ggplot2);
+// rect = mapping.qrect
+// if (rect$crs == "EPSG:3857") {
+//   xmin = -20026376.39
+//   xmax = 20026376.39
+//   ymin = -20048966.10
+//   ymax = 20048966.10
+// }else {
+//   xmin = -180
+//   xmax = 180
+//   ymin = -90
+//   ymax = 180
+// }
+// values = c()
+// rect$x1 = xmin
+// rect$x2 = xmax
+// rect$y1 = ymin
+// rect$y2 = ymax
+// dates = ${this.time.time_start}:${this.time.time_end}
+// for (date in sprintf("%d-01-01", dates)) {
+//   t1 = as.numeric(as.POSIXct(date, format="%Y-%m-%d"))
+//   rect$t1 = t1
+//   rect$t2 = t1 + 0.000001
+//   data = mapping.loadRaster(0, rect)
+//   value = cellStats(data, stat="sum")
+//   pixels = sum(!is.na(getValues(data)))
+//   percentage = value / pixels
+//   values = c(values, percentage)
+// }
+//   df = data.frame(dates, values)
+//   p = (
+//     ggplot(df, aes(x=dates,y=values))
+//     + geom_area(fill="red", alpha=.6)
+//     + geom_line()
+//     + geom_point()
+//     + expand_limits(y=0)
+//     + xlab("Year")
+//     + ylab("")
+//     + ggtitle("Global")
+//     + theme(text = element_text(size=20)) +
+//       scale_y_continuous(labels = scales::percent) +
+//       scale_x_continuous(breaks = dates)
+//   )
+// print(p)`,
+//                 resultType: ResultTypes.PLOT,
+//             }),
+//             resultType: ResultTypes.PLOT,
+//             projection: this.ebvLayer.operator.projection,
+//             rasterSources: [this.ebvLayer.operator],
+//         });
+//         const plot_global = new Plot({
+//             name: 'global plot',
+//             operator: operator_global,
+//         });
+//
+//         this.projectService.addPlot(plot_global);
 
         this.addComparisonPlot(clippedLayer, this.countryLayer.name, this.ebvLayer.name);
     }
@@ -337,7 +343,7 @@ p = (
         + expand_limits(y=0)
         + xlab("Year")
         + ylab(\"${layer_name}\")
-        + ggtitle("Comparison: ${title} - global")
+        + ggtitle("${title} - global")
         + theme(text = element_text(size=20)) +
         scale_y_continuous(labels = scales::percent) +
         scale_x_continuous(breaks = dates)
@@ -393,7 +399,7 @@ print(p)`,
         });
 
         this.projectService.addLayer(layer);
-        this.projectService.changeLayer(layer, {visible: false})
+        this.projectService.changeLayer(layer, {visible: false});
         return layer;
     }
 

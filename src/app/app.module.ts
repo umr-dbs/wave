@@ -146,7 +146,8 @@ import {TerminologyLookupOperatorComponent} from './operators/dialogs/terminolog
 import {VectorSourceDatasetComponent} from './operators/dialogs/data-repository/vector/vector-source-dataset.component';
 import {EBVComponent} from './components/ebv-selection/ebv-selection.component';
 import {CountrySelectionComponent} from './components/country-selection/country-selection.component';
-import {TimeSelectionComponent} from './components/time-selection/time-selection.component';
+import {TimeStampSelectionComponent} from './components/time-selection/stamp-selection/time-stamp-selection.component';
+import {TimeRangeSelectionComponent} from './components/time-selection/range-selection/time-range-selection.component';
 
 export function configInitializer(config: Config) {
     return () => config.load();
@@ -274,7 +275,8 @@ export function configInitializer(config: Config) {
         VectorSourceDatasetComponent,
         EBVComponent,
         CountrySelectionComponent,
-        TimeSelectionComponent
+        TimeStampSelectionComponent,
+        TimeRangeSelectionComponent,
     ],
     imports: [
         BrowserModule,
@@ -340,7 +342,8 @@ export function configInitializer(config: Config) {
         TerminologyLookupOperatorComponent,
         EBVComponent,
         CountrySelectionComponent,
-        TimeSelectionComponent
+        TimeStampSelectionComponent,
+        TimeRangeSelectionComponent,
     ],
     providers: [
         DragulaService,

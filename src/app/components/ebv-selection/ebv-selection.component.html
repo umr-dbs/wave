@@ -1,15 +1,17 @@
 <wave-sidenav-header>GEO-BON</wave-sidenav-header>
-<div fxLayout="column" fxLayoutAlign="space-around stretch" style="height:100%" class="form">
+<div fxLayout="column" fxLayoutAlign="space-around stretch" fxLayoutGap="1rem" style="height:100%" class="form">
     <mat-select placeholder = "EBV Layer">
         <mat-option *ngFor="let layer of (ebv | async)" [value]="layer.name" (click)="setEBVLayer(layer)">
             {{layer.name}}
         </mat-option>
     </mat-select>
     <wave-country-selection (layer)="setCountryLayer($event)"></wave-country-selection>
-    <wave-time-selection #time></wave-time-selection>
+    <wave-time-stamp-selection [time_min] = "2001" [time_max]="2012"></wave-time-stamp-selection>
+    <wave-time-range-selection #time [time_min] = "2001" [time_max]="2012"></wave-time-range-selection>
     <button mat-raised-button type="submit" color="primary"
     [disabled]="countryLayer === undefined"
     (click)="reload()">
         Reload
     </button>
+    <wave-plot-list [style.height.px]="bottomContainerHeight$ | async" [cardHeight$]="bottomContainerHeight$"></wave-plot-list>
 </div>

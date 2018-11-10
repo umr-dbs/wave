@@ -1,0 +1,12 @@
+<mat-card>
+    <mat-card-header>
+        <mat-card-title>Map-Time</mat-card-title>
+    </mat-card-header>
+    <mat-slider thumbLabel
+                mat-discrete
+                [(ngModel)]="time"
+                max="{{time_max}}"
+                min="{{time_min}}"
+                step="1"
+                (input)="setTime()"></mat-slider>
+</mat-card>

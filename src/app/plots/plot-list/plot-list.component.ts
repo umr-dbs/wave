@@ -95,27 +95,7 @@ export class PlotListComponent implements OnInit, AfterViewInit, OnDestroy {
         );
     }
 
-    compareFullscreen() {
-        let comparison: Plot;
-        this.projectService.getPlotStream().subscribe(
-            p => p.forEach(plot => {
-                if (plot.name === 'Comparison') {
-                    comparison = plot;
-                }
-            })
-        );
-        this.dialog.open(
-            PlotDetailViewComponent,
-            {
-                data: comparison,
-                maxHeight: '100vh',
-                maxWidth: '100vw',
-            },
-        );
-    }
-
     filter(plots: Plot[]): Plot[] {
-        if (plots === null) return null;
-        return plots.filter(plot => plot.name !== 'Comparison');
+        return plots;
     }
 }

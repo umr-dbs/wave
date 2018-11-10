@@ -3,7 +3,7 @@
 </p>
 <div fxLayout="row" fxLayoutAlign="space-around start">
     <mat-card *ngFor="let plot of filter(projectService.getPlotStream() | async)"
-              fxLayout="row"
+              fxLayout="column"
               fxLayoutAlign="space-between">
 
         <mat-card-content *ngIf="(projectService.getPlotDataStatusStream(plot) | async) === LoadingState.LOADING">
@@ -20,14 +20,9 @@
                      alt="{{plot.name}}">
             </div>
         </mat-card-content>
-        <mat-card-actions fxLayout="column"
-                          *ngIf="(projectService.getPlotDataStatusStream(plot) | async) === LoadingState.OK">
+        <mat-card-actions *ngIf="(projectService.getPlotDataStatusStream(plot) | async) === LoadingState.OK">
             <button mat-button (click)="showFullscreen(plot)"
             ><mat-icon>fullscreen</mat-icon></button>
-            <button mat-button (click)="compareFullscreen()"
-            ><mat-icon>compare_arrows</mat-icon></button>
-            <button mat-button
-            ><mat-icon>visibility</mat-icon></button>
         </mat-card-actions>
     </mat-card>
 </div>
