@@ -42,6 +42,7 @@ export class EBVComponent implements OnInit, AfterViewInit {
     @ViewChild('time') time: TimeRangeSelectionComponent;
     bottomContainerHeight$ = new BehaviorSubject<number>(0);
     windowHeight$ = new BehaviorSubject<number>(window.innerHeight);
+    aggregation_fn = "sum";
 
     constructor(private formBuilder: FormBuilder,
                 private projectService: ProjectService,
@@ -256,7 +257,7 @@ for (date in sprintf("%d-01-01", dates)) {
   rect$t2 = t1 + 0.000001
   #print(rect$t1)
   data = mapping.loadRaster(0, rect)
-  value = cellStats(data, stat="sum")
+  value = cellStats(data, stat="${this.aggregation_fn}")
   pixels = sum(!is.na(getValues(data)))
   percentage = value / pixels
   values = c(values, percentage)
@@ -319,7 +320,7 @@ for (date in sprintf("%d-01-01", dates)) {
   rect$y1 = ymin(c_extent)
   rect$y2 = ymax(c_extent)
   data0 = mapping.loadRaster(0, rect)
-  value = cellStats(data0, stat="sum")
+  value = cellStats(data0, stat="${this.aggregation_fn}")
   pixels = sum(!is.na(getValues(data0)))
   percentage = value / pixels
   values0 = c(values0, percentage)
@@ -328,7 +329,7 @@ for (date in sprintf("%d-01-01", dates)) {
   rect$y1 = ymin
   rect$y2 = ymax
   data1 = mapping.loadRaster(1, rect)
-  value = cellStats(data1, stat="sum")
+  value = cellStats(data1, stat="${this.aggregation_fn}")
   pixels = sum(!is.na(getValues(data1)))
   percentage = value / pixels
   values1 = c(values1, percentage)

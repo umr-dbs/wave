@@ -7,11 +7,23 @@
     </mat-select>
     <wave-country-selection (layer)="setCountryLayer($event)"></wave-country-selection>
     <wave-time-stamp-selection [time_min] = "2001" [time_max]="2012"></wave-time-stamp-selection>
-    <wave-time-range-selection #time [time_min] = "2001" [time_max]="2012"></wave-time-range-selection>
+    <mat-card>
+        <mat-card-header>
+            <mat-card-title>Plot-Time</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+            <wave-time-range-selection #time [time_min] = "2001" [time_max]="2012"></wave-time-range-selection>
+            <mat-radio-group [(ngModel)]="aggregation_fn" fxLayout="row" fxLayoutAlign="space-around center">
+                <mat-radio-button value="sum">sum</mat-radio-button>
+                <mat-radio-button value="fraction">fraction</mat-radio-button>
+                <mat-radio-button value="mean">average</mat-radio-button>
+            </mat-radio-group>
+        </mat-card-content>
+    </mat-card>
     <button mat-raised-button type="submit" color="primary"
     [disabled]="countryLayer === undefined"
     (click)="reload()">
         Reload
     </button>
-    <wave-plot-list [style.height.px]="bottomContainerHeight$ | async" [cardHeight$]="bottomContainerHeight$"></wave-plot-list>
+    <wave-plot-list [style.height.px]="bottomContainerHeight$ | async" [cardHeight$]="bottomContainerHeight$" style="padding: 0"></wave-plot-list>
 </div>

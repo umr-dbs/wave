@@ -3,7 +3,7 @@
 </p>
 <div fxLayout="row" fxLayoutAlign="space-around start">
     <mat-card *ngFor="let plot of filter(projectService.getPlotStream() | async)"
-              fxLayout="column"
+              fxLayout="row"
               fxLayoutAlign="space-between">
 
         <mat-card-content *ngIf="(projectService.getPlotDataStatusStream(plot) | async) === LoadingState.LOADING">
@@ -14,13 +14,14 @@
             *ngIf="(projectService.getPlotDataStatusStream(plot) | async) === LoadingState.OK"
             [ngSwitch]="(projectService.getPlotDataStream(plot) | async)?.type"
         >
-            <div [style.width.px] = "(cardHeight$ | async) - 80"
-                 [style.height.px] = "(cardHeight$ | async) - 80">
+            <div [style.width.px] = "(cardHeight$ | async) - 4 * 16"
+                 [style.height.px] = "(cardHeight$ | async) - 4 * 16">
                 <img src="data:image/png;base64,{{(projectService.getPlotDataStream(plot) | async)?.data}}"
                      alt="{{plot.name}}">
             </div>
         </mat-card-content>
-        <mat-card-actions *ngIf="(projectService.getPlotDataStatusStream(plot) | async) === LoadingState.OK">
+        <mat-card-actions *ngIf="(projectService.getPlotDataStatusStream(plot) | async) === LoadingState.OK"
+        fxLayout="column" fxLayoutAlign="start start">
             <button mat-button (click)="showFullscreen(plot)"
             ><mat-icon>fullscreen</mat-icon></button>
         </mat-card-actions>

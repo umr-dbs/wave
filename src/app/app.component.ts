@@ -142,8 +142,7 @@ export class AppComponent implements OnInit, AfterViewInit {
                 }
             }, 0);
         });
-        this.layoutService.setSidenavContentComponent({component: EBVComponent,
-        data: this.bottomContainerHeight$});
+        this.layoutService.setSidenavContentComponent({component: EBVComponent});
 
         // show splash screen
         if (this.userService.shouldShowIntroductoryPopup()) {
