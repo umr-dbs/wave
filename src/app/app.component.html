@@ -2,10 +2,26 @@
     <mat-sidenav #sidenavRight mode="side" position="end" (openedChange)="mapComponent.resize()">
         <wave-sidenav-container #sidenavContainer></wave-sidenav-container>
     </mat-sidenav>
-    <div class="time-container" fxLayoutAlign="space-between start" fxLayoutGap="1rem">
+    <div class="time-container" fxLayoutAlign="space-around start" fxLayoutGap="1rem">
         <wave-zoom-handles (zoomIn)="map.zoomIn()" (zoomOut)="map.zoomOut()" class="mat-elevation-z4"></wave-zoom-handles>
         <wave-time-stamp-selection [time]="2007" [time_max]="2012" [time_min]="2001" class="mat-elevation-z4"></wave-time-stamp-selection>
-        <wave-small-time-interaction class="mat-elevation-z4"></wave-small-time-interaction>
+    </div>
+    <div class="legend-container mat-elevation-z4" *ngIf="(ebvLayer$ | async) !== null"
+            fxLayout="column"
+            fxLayoutAlign="space-between start"
+            fxLayoutGap="8px">
+        <span style="padding-left: 4px">Legend</span>
+        <wave-legendary-mapping-colorizer-raster
+            [symbology]="(ebvLayer$ | async).symbology"
+            [symbologyData]="projectService.getLayerSymbologyDataStream(layer) | async"
+            style="padding-left: 8px;"></wave-legendary-mapping-colorizer-raster>
+    </div>
+    <div class="download-container">
+        <button mat-raised-button
+                *ngIf="(ebvLayer$ | async) !== null"
+                (click)="dialog.open(LayerExportComponent, {data: {layer: ebvLayer$.getValue()}})">
+            <mat-icon>file_download</mat-icon>
+        </button>
     </div>
     <!-- <wave-navigation></wave-navigation> -->
     <!-- <wave-layer-list class="mat-elevation-z4" [height]="middleContainerHeight$ | async"></wave-layer-list> -->

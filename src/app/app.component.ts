@@ -18,7 +18,7 @@ import {MatDialog, MatIconRegistry, MatSidenav, MatTabGroup} from '@angular/mate
 import {
     AbstractVectorSymbology,
     ComplexPointSymbology,
-    ComplexVectorSymbology,
+    ComplexVectorSymbology, RasterSymbology,
     Symbology
 } from './layers/symbology/symbology.model';
 import {ResultTypes} from './operators/result-type.model';
@@ -32,7 +32,7 @@ import {StorageService, StorageStatus} from './storage/storage.service';
 
 import {MapComponent} from './map/map.component';
 
-import {Layer, VectorLayer} from './layers/layer.model';
+import {Layer, RasterLayer, VectorLayer} from './layers/layer.model';
 import {LayerService} from './layers/layer.service';
 import {SplashDialogComponent} from './dialogs/splash-dialog/splash-dialog.component';
 import {DomSanitizer} from '@angular/platform-browser';
@@ -58,6 +58,7 @@ import {Config} from './config.service';
 import {OverlayContainer} from '@angular/cdk/overlay';
 import {MapService} from './map/map.service';
 import {EBVComponent} from './components/ebv-selection/ebv-selection.component';
+import {LayerExportComponent} from './layers/dialogs/layer-export/layer-export.component';
 
 @Component({
     selector: 'wave-app',
@@ -66,6 +67,8 @@ import {EBVComponent} from './components/ebv-selection/ebv-selection.component';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent implements OnInit, AfterViewInit {
+
+    LayerExportComponent = LayerExportComponent;
     @ViewChild(MapComponent) mapComponent: MapComponent;
 
     @ViewChild(MatSidenav) rightSidenav: MatSidenav;
@@ -75,6 +78,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     layerDetailViewVisible$: Observable<boolean>;
     middleContainerHeight$: Observable<number>;
     bottomContainerHeight$: Observable<number>;
+    ebvLayer$ = new BehaviorSubject<Layer<Symbology>>(null);
     layersReverse$: Observable<Array<Layer<Symbology>>>;
     // for ng-switch
     ResultTypes = ResultTypes; // tslint:disable-line:no-unused-variable variable-name
@@ -130,6 +134,15 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
 
     ngAfterViewInit() {
+        this.projectService.getLayerStream().subscribe(layers => {
+            let names = layers.map(layer => layer.getLayerType());
+            let i = names.indexOf('raster');
+            if (i >= 0) {
+                this.ebvLayer$.next(layers[i]);
+            } else {
+                this.ebvLayer$.next(null);
+            }
+        });
         this.projectService.clearLayers();
         this.projectService.clearPlots();
         this.layoutService.getSidenavContentComponentStream().subscribe(sidenavConfig => {

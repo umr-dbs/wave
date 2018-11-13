@@ -52,6 +52,7 @@ export class EBVComponent implements OnInit, AfterViewInit {
     time_end = this.time_max;
     years_start$ = new BehaviorSubject(range(this.time_min, this.time_max));
     years_end$ = new BehaviorSubject(range(this.time_min + 1, this.time_max + 1));
+    geobon_source: MappingSource;
 
     constructor(private formBuilder: FormBuilder,
                 private projectService: ProjectService,
@@ -66,6 +67,7 @@ export class EBVComponent implements OnInit, AfterViewInit {
                 let s = sources[i];
                 if (s.name === 'GEO BON') {
                     this.ebv = observableOf(s.rasterLayer);
+                    this.geobon_source = s;
                 }
             }
         });
@@ -82,11 +84,11 @@ export class EBVComponent implements OnInit, AfterViewInit {
     }
 
     setCountryLayer(layer: VectorLayer<ComplexVectorSymbology>) {
-        if (this.countryLayer !== null) {
-            this.projectService.removeLayer(this.countryLayer);
-        }
+        // if (this.countryLayer !== null) {
+        //     this.projectService.removeLayer(this.countryLayer);
+        // }
         this.countryLayer = layer;
-        this.projectService.addLayer(this.countryLayer);
+        // this.projectService.addLayer(this.countryLayer);
     }
 
     setEBVLayer(channel: MappingSourceRasterLayer) {
@@ -109,14 +111,17 @@ export class EBVComponent implements OnInit, AfterViewInit {
                 colorizer: colorizerConfig,
             }),
         });
-        if (this.ebvLayer !== null) {
-            this.projectService.removeLayer(this.ebvLayer);
-        }
+        // if (this.ebvLayer !== null) {
+        //     this.projectService.removeLayer(this.ebvLayer);
+        // }
         this.ebvLayer = layer;
-        this.projectService.addLayer(this.ebvLayer);
+        // this.projectService.addLayer(this.ebvLayer);
     }
 
     reload() {
+        this.projectService.clearLayers();
+        this.projectService.addLayer(this.ebvLayer);
+        this.projectService.addLayer(this.countryLayer);
         this.projectService.clearPlots();
         const countryOperator: Operator = this.countryLayer.operator;
 
@@ -413,9 +418,6 @@ print(p)`,
             operator: expressionOperator,
             symbology: rasterLayer.symbology,
         });
-
-        this.projectService.addLayer(layer);
-        this.projectService.changeLayer(layer, {visible: false});
         return layer;
     }
 
