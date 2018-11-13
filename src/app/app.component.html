@@ -1,9 +1,11 @@
 <mat-sidenav-container fullscreen>
-    <mat-sidenav #sidenavRight mode="side" (openedChange)="mapComponent.resize()">
+    <mat-sidenav #sidenavRight mode="side" position="end" (openedChange)="mapComponent.resize()">
         <wave-sidenav-container #sidenavContainer></wave-sidenav-container>
     </mat-sidenav>
-    <div class="time-container" fxLayoutAlign="space-around center">
+    <div class="time-container" fxLayoutAlign="space-between start" fxLayoutGap="1rem">
         <wave-zoom-handles (zoomIn)="map.zoomIn()" (zoomOut)="map.zoomOut()" class="mat-elevation-z4"></wave-zoom-handles>
+        <wave-time-stamp-selection [time]="2007" [time_max]="2012" [time_min]="2001" class="mat-elevation-z4"></wave-time-stamp-selection>
+        <wave-small-time-interaction class="mat-elevation-z4"></wave-small-time-interaction>
     </div>
     <!-- <wave-navigation></wave-navigation> -->
     <!-- <wave-layer-list class="mat-elevation-z4" [height]="middleContainerHeight$ | async"></wave-layer-list> -->

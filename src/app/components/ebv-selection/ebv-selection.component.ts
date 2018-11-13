@@ -24,6 +24,8 @@ import {Projection, Projections} from '../../operators/projection.model';
 import {DataType, DataTypes} from '../../operators/datatype.model';
 import {TimeRangeSelectionComponent} from '../time-selection/range-selection/time-range-selection.component';
 import {LayoutService} from '../../layout.service';
+import {range} from "d3";
+import {MatSelect} from "@angular/material";
 
 
 @Component({
@@ -39,10 +41,17 @@ export class EBVComponent implements OnInit, AfterViewInit {
 
     sources: Observable<Array<MappingSource>>;
     ebv: Observable<Array<MappingSourceRasterLayer>>;
-    @ViewChild('time') time: TimeRangeSelectionComponent;
+    @ViewChild('timestartselect') time_start_select: MatSelect;
+    @ViewChild('timeendselect') time_end_select: MatSelect;
     bottomContainerHeight$ = new BehaviorSubject<number>(0);
     windowHeight$ = new BehaviorSubject<number>(window.innerHeight);
-    aggregation_fn = "sum";
+    aggregation_fn = 'sum';
+    time_min = 2001;
+    time_max = 2012;
+    time_start = this.time_min;
+    time_end = this.time_max;
+    years_start$ = new BehaviorSubject(range(this.time_min, this.time_max));
+    years_end$ = new BehaviorSubject(range(this.time_min + 1, this.time_max + 1));
 
     constructor(private formBuilder: FormBuilder,
                 private projectService: ProjectService,
@@ -64,6 +73,12 @@ export class EBVComponent implements OnInit, AfterViewInit {
     }
 
     ngAfterViewInit() {
+        this.time_start_select.valueChange.subscribe(value => {
+            this.years_end$.next(range(value + 1, this.time_max + 1));
+        });
+        this.time_end_select.valueChange.subscribe(value => {
+            this.years_start$.next(range(this.time_min, value));
+        })
     }
 
     setCountryLayer(layer: VectorLayer<ComplexVectorSymbology>) {
@@ -138,7 +153,7 @@ export class EBVComponent implements OnInit, AfterViewInit {
 // rect$xres = xres
 // rect$yres = yres
 // c_extent = extent(c_layer)
-// dates = ${this.time.time_start}:${this.time.time_end}
+// dates = ${this.time_start}:${this.time_end}
 // for (date in sprintf("%d-01-01", dates)) {
 //   t1 = as.numeric(as.POSIXct(date, format="%Y-%m-%d"))
 //   rect$x1 = xmin(c_extent)
@@ -204,7 +219,7 @@ export class EBVComponent implements OnInit, AfterViewInit {
 // rect$x2 = xmax
 // rect$y1 = ymin
 // rect$y2 = ymax
-// dates = ${this.time.time_start}:${this.time.time_end}
+// dates = ${this.time_start}:${this.time_end}
 // for (date in sprintf("%d-01-01", dates)) {
 //   t1 = as.numeric(as.POSIXct(date, format="%Y-%m-%d"))
 //   rect$t1 = t1
@@ -249,7 +264,7 @@ export class EBVComponent implements OnInit, AfterViewInit {
     code(title: string, layer_name: string): string {
         return `library(ggplot2);
             values = c()
-            dates = ${this.time.time_start}:${this.time.time_end}
+            dates = ${this.time_start}:${this.time_end}
 for (date in sprintf("%d-01-01", dates)) {
   t1 = as.numeric(as.POSIXct(date, format="%Y-%m-%d"))
   rect = mapping.qrect
@@ -309,7 +324,7 @@ c_layer = mapping.loadPolygons(0, rect)
 rect$xres = xres
 rect$yres = yres
 c_extent = extent(c_layer)
-dates = ${this.time.time_start}:${this.time.time_end}
+dates = ${this.time_start}:${this.time_end}
 for (date in sprintf("%d-01-01", dates)) {
   t1 = as.numeric(as.POSIXct(date, format="%Y-%m-%d"))
   rect = mapping.qrect
