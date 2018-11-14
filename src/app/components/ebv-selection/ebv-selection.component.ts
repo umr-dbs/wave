@@ -300,6 +300,14 @@ print(p)`;
     }
 
     addComparisonPlot(clippedLayer: RasterLayer<RasterSymbology>, title: string, layer_name: string) {
+        let cellStats_fn = (this.aggregation_fn !== 'mean') ? 'sum' : 'mean';
+        let pixels = function(i: number, aggregation: string) {
+            return (aggregation === 'fraction') ? 'sum(!is.na(getValues(data' + i + ')))' : 1;
+        };
+        let theme = '';
+        if (this.aggregation_fn === 'fraction') {
+            theme = '        + scale_y_continuous(labels = scales::percent) +\n        scale_x_continuous(breaks = dates)'
+        }
         const operator: Operator = new Operator({
             operatorType: new RScriptType({
                 code: `library(ggplot2)
@@ -340,8 +348,8 @@ for (date in sprintf("%d-01-01", dates)) {
   rect$y1 = ymin(c_extent)
   rect$y2 = ymax(c_extent)
   data0 = mapping.loadRaster(0, rect)
-  value = cellStats(data0, stat="${this.aggregation_fn}")
-  pixels = sum(!is.na(getValues(data0)))
+  value = cellStats(data0, stat="${cellStats_fn}")
+  pixels = ${pixels(0, this.aggregation_fn)}
   percentage = value / pixels
   values0 = c(values0, percentage)
   rect$x1 = xmin
@@ -349,8 +357,8 @@ for (date in sprintf("%d-01-01", dates)) {
   rect$y1 = ymin
   rect$y2 = ymax
   data1 = mapping.loadRaster(1, rect)
-  value = cellStats(data1, stat="${this.aggregation_fn}")
-  pixels = sum(!is.na(getValues(data1)))
+  value = cellStats(data1, stat="${cellStats_fn}")
+  pixels = ${pixels(1, this.aggregation_fn)}
   percentage = value / pixels
   values1 = c(values1, percentage)
 }
@@ -365,9 +373,8 @@ p = (
         + xlab("Year")
         + ylab(\"${layer_name}\")
         + ggtitle("${title} - global")
-        + theme(text = element_text(size=20)) +
-        scale_y_continuous(labels = scales::percent) +
-        scale_x_continuous(breaks = dates)
+        + theme(text = element_text(size=20))
+        ${theme}
 )
 print(p)`,
                 resultType: ResultTypes.PLOT,
