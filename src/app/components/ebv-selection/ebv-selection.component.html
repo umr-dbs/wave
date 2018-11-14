@@ -8,7 +8,8 @@
                 </mat-option>
             </mat-select>
         </mat-card-header>
-        <mat-card-content fxLayout="row" fxLayoutAlign="space-between center" *ngIf="geobon_source && geobon_source.descriptionText">
+        <mat-card-content fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="1rem"
+                          *ngIf="geobon_source && geobon_source.descriptionText">
             <img src="{{geobon_source.imgUrl}}" *ngIf="geobon_source.imgUrl">
             <p>{{geobon_source.descriptionText}}</p>
         </mat-card-content>

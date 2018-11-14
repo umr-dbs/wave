@@ -1,9 +1,11 @@
-<div class="container" fxLayout="row" fxLayoutAlign="space-between center" >
+<div class="container" fxLayout="row" fxLayoutAlign="space-between center" style="width:100%">
     <span>{{time_min}}</span>
-    <mat-slider mat-discrete
+    <mat-slider style="width:100%;"
+                mat-discrete
                 [(ngModel)]="time"
                 max="{{time_max}}"
                 min="{{time_min}}"
+                tickInterval="1"
                 step="1"
                 (change)="setTime()"></mat-slider>
     <span>{{time_max}}</span>

@@ -15,14 +15,18 @@ wave-layer-list {
 
 .time-container {
     position: absolute;
-    left: 16vw;
-    right: 16vw;
+    left: 12vw;
+    right: 12vw;
 
     wave-time-stamp-selection, wave-zoom-handles {
         background-color: rgba(255, 255, 255, 0.87);
         border-bottom-left-radius: 2px;
         border-bottom-right-radius: 2px;
         z-index: 3;
+    }
+
+    wave-time-stamp-selection {
+        width: 50%;
     }
 }
 
