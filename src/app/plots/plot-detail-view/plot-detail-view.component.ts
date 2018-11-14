@@ -5,10 +5,17 @@ import {first} from 'rxjs/operators';
 import {AfterViewInit, ChangeDetectionStrategy, Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA} from '@angular/material';
 import {ProjectService} from '../../project/project.service';
-import {Plot} from '../plot.model';
+import {Plot, PlotData} from '../plot.model';
 import {LayoutService} from '../../layout.service';
 import {MappingQueryService} from '../../queries/mapping-query.service';
-import {MapService} from '../../map/map.service';
+// import {MapService} from '../../map/map.service';
+import {TimeInterval} from '../../time/time.model';
+
+export interface PlotDetailViewData {
+    plot: Plot,
+    initialPlotData: PlotData,
+    time: TimeInterval,
+}
 
 @Component({
     selector: 'wave-plot-detail-view',
@@ -26,31 +33,31 @@ export class PlotDetailViewComponent implements OnInit, AfterViewInit {
     imagePlotLoading$ = new BehaviorSubject(true);
 
     constructor(public projectService: ProjectService,
-                private mapService: MapService,
+                // private mapService: MapService,
                 private mappingQueryService: MappingQueryService,
-                @Inject(MAT_DIALOG_DATA) public plot: Plot) {
+                @Inject(MAT_DIALOG_DATA) public data: PlotDetailViewData) {
     }
 
     ngOnInit() {
         observableCombineLatest(
-                this.projectService.getPlotDataStream(this.plot),
-                this.projectService.getTimeStream(),
-                this.projectService.getProjectionStream(),
-                this.mapService.getViewportSizeStream(),
+                // this.projectService.getPlotDataStream(this.plot),
+                // this.projectService.getTimeStream(),
+                // this.projectService.getProjectionStream(),
+                // this.mapService.getViewportSizeStream(),
                 this.maxWidth$, this.maxHeight$
             ).pipe(
             first())
-            .subscribe(([plotData, time, projection, viewport, width, height]) => {
+            .subscribe(([/*plotData, time, projection, viewport,*/ width, height]) => {
                 // set data uri for png type and load full screen image
-                if (plotData.type === 'png') {
-                    this.imagePlotData$.next(`data:image/png;base64,${plotData.data}`);
+                // if (plotData.type === 'png') {
+                    this.imagePlotData$.next(`data:image/png;base64,${this.data.initialPlotData.data}`);
 
                     this.mappingQueryService
                         .getPlotData({
-                            operator: this.plot.operator,
-                            time: time,
-                            extent: viewport.extent,
-                            projection: projection,
+                            operator: this.data.plot.operator,
+                            time: this.data.time,
+                            extent: this.data.plot.operator.projection.getExtent(),
+                            projection: this.data.plot.operator.projection,
                             plotWidth: width - LayoutService.remInPx(),
                             plotHeight: height,
                         }).pipe(
@@ -60,7 +67,7 @@ export class PlotDetailViewComponent implements OnInit, AfterViewInit {
 
                             this.imagePlotLoading$.next(false);
                         });
-                }
+                // }
             });
     }
 
