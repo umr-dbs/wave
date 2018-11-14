@@ -34,12 +34,12 @@ export class LayoutService {
     /**
      * Is the layer list visible?
      */
-    private layerListVisible$: BehaviorSubject<boolean> = new BehaviorSubject(true);
+    private layerListVisible$: BehaviorSubject<boolean> = new BehaviorSubject(false);
 
     /**
      * Is the data table visible?
      */
-    private layerDetailViewVisible$: BehaviorSubject<boolean> = new BehaviorSubject(true);
+    private layerDetailViewVisible$: BehaviorSubject<boolean> = new BehaviorSubject(false);
 
     /**
      * What is the currently visible tab?
@@ -49,7 +49,7 @@ export class LayoutService {
     /**
      * What is the height of the layer detail view as a percentage of the available space.
      */
-    private layerDetailViewHeightPercentage$: BehaviorSubject<number> = new BehaviorSubject(2 / 5);
+    private layerDetailViewHeightPercentage$: BehaviorSubject<number> = new BehaviorSubject(5 / 11);
 
     /**
      *  Sidenav content
@@ -129,10 +129,10 @@ export class LayoutService {
     /**
      * Calculate the height of the data table.
      */
-    private static calculateLayerDetailViewHeight(layerDetailViewHeightPercentage: number, totalAvailableHeight: number): number {
+    public static calculateLayerDetailViewHeight(layerDetailViewHeightPercentage: number, totalAvailableHeight: number): number {
         return Math.max(
             Math.ceil(layerDetailViewHeightPercentage * totalAvailableHeight),
-            LayoutService.getLayerDetailViewBarHeightPx()
+            0
         );
     }
 
@@ -312,8 +312,7 @@ export class LayoutService {
             this.layerDetailViewVisible$,
             (layerDetailViewHeightPercentage, totalAvailableHeight, layerDetailViewVisible): number => {
                 return LayoutService.calculateMapHeight(
-                    layerDetailViewVisible ? layerDetailViewHeightPercentage : 0,
-                    totalAvailableHeight
+                    0, totalAvailableHeight
                 );
             }
         );

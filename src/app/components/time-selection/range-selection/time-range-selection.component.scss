@@ -1,0 +1,20 @@
+@import '../../../../wave-app-theme';
+
+mat-slider {
+    position: absolute;
+    width: 100%;
+    padding: 0;
+    min-width: 0;
+}
+
+mat-slider /deep/ .mat-slider-thumb-container,
+mat-slider /deep/ .mat-slider-track-fill,
+mat-slider /deep/ .mat-slider-track-background,
+mat-slider /deep/ .mat-slider-ticks-container{
+    -webkit-transition: none !important;
+    transition: none !important;
+}
+
+.filler /deep/ .mat-slider-thumb-container {
+    display: none;
+}

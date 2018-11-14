@@ -1,0 +1,13 @@
+<mat-select *ngIf="!(isLoading$ | async)" placeholder = "Country">
+    <mat-option
+        *ngFor="let entry of (filteredEntries$ | async)"
+        (click)="addLayer(entry[sourceIdColumn], createFilterOperator(entry[sourceIdColumn]))"
+        [value]="entry[sourceIdColumn]"
+    >
+        {{entry[sourceIdColumn]}}
+    </mat-option>
+</mat-select>
+
+<div *ngIf="(isLoading$ | async);" class="loading">
+    <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+</div>

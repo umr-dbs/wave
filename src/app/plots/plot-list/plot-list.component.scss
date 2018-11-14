@@ -20,6 +20,10 @@ img.mat-card-avatar {
     border-radius: 50%;
 }
 
+mat-card-content {
+    overflow: hidden;
+}
+
 pre {
     overflow: hidden;
 }
@@ -36,6 +40,7 @@ mat-spinner {
 
 .no-plots {
     color: mat-color(map-get($wave-app-theme, foreground), secondary-text);
-    margin-top: 50%;
+    margin-top: 10%;
     text-align: center;
 }
+

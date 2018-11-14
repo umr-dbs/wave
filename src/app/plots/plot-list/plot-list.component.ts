@@ -1,7 +1,7 @@
 
 import {BehaviorSubject, Subscription} from 'rxjs';
 import {first, filter} from 'rxjs/operators';
-import {AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit} from '@angular/core';
+import {AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, Input, OnDestroy, OnInit} from '@angular/core';
 import {ProjectService} from '../../project/project.service';
 import {LoadingState} from '../../project/loading-state.model';
 import {MatDialog} from '@angular/material';
@@ -10,6 +10,7 @@ import {RScriptType} from '../../operators/types/r-script-type.model';
 import {BoxPlotType} from '../../operators/types/boxplot-type.model';
 import {ScatterPlotType} from '../../operators/types/scatterplot-type.model';
 import {PieChartType} from '../../operators/types/piechart-type.model';
+import {TimePlotType} from '../../operators/types/timeplot-type.model';
 import {LayoutService} from '../../layout.service';
 import {ROperatorComponent} from '../../operators/dialogs/r/r-operator/r-operator.component';
 import {Plot} from '../plot.model';
@@ -28,17 +29,21 @@ export class PlotListComponent implements OnInit, AfterViewInit, OnDestroy {
     ScatterPlotType = ScatterPlotType;
     PieChartType = PieChartType;
     BoxPlotType = BoxPlotType;
+    TimePlotType = TimePlotType;
     //
     // to distinguish some r-script operators out of the editable ones.
-    editExceptions = [this.ScatterPlotType.NAME, this.PieChartType.NAME, this.BoxPlotType.NAME];
+    editExceptions = [this.ScatterPlotType.NAME, this.PieChartType.NAME, this.BoxPlotType.NAME, this.TimePlotType.NAME];
     LoadingState = LoadingState;
     cardWidth$: BehaviorSubject<number> = new BehaviorSubject(undefined);
     private subsriptions: Array<Subscription> = [];
+
+    @Input() cardHeight$: BehaviorSubject<number>;
 
     constructor(public projectService: ProjectService,
                 private layoutService: LayoutService,
                 public dialog: MatDialog,
                 private elementRef: ElementRef) {
+        this.layoutService = layoutService;
     }
 
     ngOnInit() {
@@ -52,7 +57,7 @@ export class PlotListComponent implements OnInit, AfterViewInit, OnDestroy {
                 .subscribe(() => {
                     setTimeout(() => {
                         const cardContent = this.elementRef.nativeElement.querySelector('mat-card');
-                        const width = parseInt(getComputedStyle(cardContent).width, 10);
+                        const width = parseInt(getComputedStyle(cardContent).height, 10);
                         this.cardWidth$.next(width);
                     });
                 })
@@ -88,5 +93,9 @@ export class PlotListComponent implements OnInit, AfterViewInit, OnDestroy {
                 maxWidth: '100vw',
             },
         );
+    }
+
+    filter(plots: Plot[]): Plot[] {
+        return plots;
     }
 }

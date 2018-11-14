@@ -34,6 +34,8 @@ import {HeatmapOperatorComponent} from '../heatmap/heatmap.component';
 import {HeatmapType} from '../../types/heatmap-type.model';
 import {TerminologyLookupOperatorComponent} from '../terminology-lookup/terminology-lookup.component';
 import {TerminologyLookupType} from '../../types/terminology-lookup-type';
+import {TimePlotType} from "../../types/timeplot-type.model";
+import {TimePlotComponent} from "../time-plot-operator/time-plot-operator.component";
 
 interface OperatorListType {
     component: Type<any>;
@@ -82,6 +84,11 @@ const PLOT_OPERATORS: Array<OperatorListType> = [
         component: BoxPlotComponent,
         type: BoxPlotType,
         description: 'Box plot your data'
+    },
+    {
+        component: TimePlotComponent,
+        type: TimePlotType,
+        description: 'Plot time data'
     }
 ];
 

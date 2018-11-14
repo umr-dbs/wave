@@ -116,7 +116,7 @@ const ConfigDefault = Immutable.fromJS({
         STORAGE_DEBOUNCE: 1500,
         GUEST_LOGIN_HINT: 5000,
     },
-    PROJECT: 'GFBio',
+    PROJECT: 'GeoBon',
     DEFAULTS: {
         PROJECT: {
             NAME: 'Default',

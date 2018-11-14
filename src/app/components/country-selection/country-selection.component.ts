@@ -1,26 +1,27 @@
 
 import {combineLatest as observableCombineLatest, ReplaySubject, Subscription, BehaviorSubject, Observable} from 'rxjs';
 import {tap, mergeMap, map} from 'rxjs/operators';
-
-import {ChangeDetectionStrategy, Component, OnDestroy, OnInit} from '@angular/core';
-import {UserService} from '../../../users/user.service';
-import {Operator} from '../../operator.model';
-import {VectorData, VectorLayer} from '../../../layers/layer.model';
-import {ResultTypes} from '../../result-type.model';
-import {ComplexVectorSymbology} from '../../../layers/symbology/symbology.model';
-import {RandomColorService} from '../../../util/services/random-color.service';
+import {ChangeDetectionStrategy, Component, OnInit, OnDestroy, EventEmitter, Output} from '@angular/core';
+import {CSVParameters, CsvSourceType} from '../../operators/types/csv-source-type.model';
+import {Projection, Projections} from '../../operators/projection.model';
+import {Operator} from '../../operators/operator.model';
+import {UserService} from '../../users/user.service';
+import {ProjectService} from '../../project/project.service';
+import {RandomColorService} from '../../util/services/random-color.service';
+import {MappingQueryService} from '../../queries/mapping-query.service';
 import {MatDialog} from '@angular/material';
-import {ProjectService} from '../../../project/project.service';
-import {Projection, Projections} from '../../projection.model';
-import {CSVParameters, CsvSourceType} from '../../types/csv-source-type.model';
-import {MappingQueryService} from '../../../queries/mapping-query.service';
-import {WFSOutputFormats} from '../../../queries/output-formats/wfs-output-format.model';
+import {DataType, DataTypes} from '../../operators/datatype.model';
+import {ResultTypes} from '../../operators/result-type.model';
+import {VectorData, VectorLayer, RasterLayer} from '../../layers/layer.model';
+import {WFSOutputFormats} from '../../queries/output-formats/wfs-output-format.model';
 import {
     TextualAttributeFilterEngineType,
     TextualAttributeFilterType
-} from '../../types/textual-attribute-filter-type.model';
-import {DataSource} from '@angular/cdk/table';
-import { DataType, DataTypes } from '../../datatype.model';
+} from '../../operators/types/textual-attribute-filter-type.model';
+import {ComplexVectorSymbology} from '../../layers/symbology/symbology.model';
+import {DataSource} from '@angular/cdk/collections';
+import {Color, RgbaTuple} from '../../colors/color';
+
 
 function nameComparator(a: string, b: string): number {
     const stripped = (s: string): string => s.replace(' ', '');
@@ -28,12 +29,12 @@ function nameComparator(a: string, b: string): number {
 }
 
 @Component({
-    selector: 'wave-country-polygon-selection',
-    templateUrl: './country-polygon-selection.component.html',
-    styleUrls: ['./country-polygon-selection.component.scss'],
+    selector: 'wave-country-selection',
+    templateUrl: 'country-selection.component.html',
+    styleUrls: ['country-selection.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CountryPolygonSelectionComponent implements OnInit, OnDestroy {
+export class CountrySelectionComponent implements OnInit, OnDestroy {
 
     searchString$ = new BehaviorSubject<string>('');
     filteredEntries$ = new ReplaySubject<Array<CountryMapType>>(1);
@@ -45,6 +46,8 @@ export class CountryPolygonSelectionComponent implements OnInit, OnDestroy {
     sourceAreaColumn = 'AREA';
 
     isLoading$ = new BehaviorSubject(true);
+
+    @Output() layer: EventEmitter<VectorLayer<ComplexVectorSymbology>> = new EventEmitter();
 
     /*
     {
@@ -193,18 +196,19 @@ Sean Gilles did some clean up and made some enhancements.`,
         });
     }
 
-    addLayer(layerName: string, operator: Operator) {
+    addLayer(name: string, operator: Operator) {
         let symbology = ComplexVectorSymbology.createSimpleSymbology({
-            fillRGBA: this.randomColorService.getRandomColorRgba(),
+            fillRGBA: Color.fromRgbaLike([0,0,0,0] as RgbaTuple),
+            strokeRGBA: Color.fromRgbaLike([255, 0, 0, 255] as RgbaTuple)
         });
 
         const layer = new VectorLayer({
-            name: layerName,
+            name: name,
             operator: operator,
             symbology: symbology,
         });
 
-        this.projectService.addLayer(layer);
+        this.layer.emit(layer);
     }
 }
 

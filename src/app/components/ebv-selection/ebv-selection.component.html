@@ -1,0 +1,65 @@
+<wave-sidenav-header>GEO-BON</wave-sidenav-header>
+<div fxLayout="column" fxLayoutAlign="space-around stretch" fxLayoutGap="1rem" style="height:100%" class="form">
+    <mat-select placeholder = "EBV Layer">
+        <mat-option *ngFor="let layer of (ebv | async)" [value]="layer.name" (click)="setEBVLayer(layer)">
+            {{layer.name}}
+        </mat-option>
+    </mat-select>
+    <mat-card *ngIf="!!geobon_source">
+        <mat-card-header>
+            <mat-card-title>{{geobon_source.name}}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content fxLayout="row" fxLayoutAlign="space-between center">
+            <img src="{{geobon_source.imgUrl}}">
+            <p>
+                {{geobon_source.descriptionText}}
+            </p>
+        </mat-card-content>
+    </mat-card>
+    <!--
+    <mat-card>
+        <mat-card-header>
+            <mat-card-title>Plot-Time</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+            <wave-time-range-selection #time [time_min] = "2001" [time_max]="2012"></wave-time-range-selection>
+            <mat-radio-group [(ngModel)]="aggregation_fn" fxLayout="row" fxLayoutAlign="space-around center">
+                <mat-radio-button value="sum">sum</mat-radio-button>
+                <mat-radio-button value="fraction">fraction</mat-radio-button>
+                <mat-radio-button value="mean">average</mat-radio-button>
+            </mat-radio-group>
+        </mat-card-content>
+    </mat-card>
+    -->
+    <mat-card>
+        <mat-card-header>
+            <mat-card-title>Plot Options</mat-card-title>
+        </mat-card-header>
+        <mat-card-content fxLayout="row" fxLayoutAlign="space-between center">
+            <wave-country-selection (layer)="setCountryLayer($event)"
+                                    [style.minWidth.%]="20"
+                                    [style.width.%]="20"></wave-country-selection>
+            <mat-select #timestartselect [(ngModel)]="time_start" [style.minWidth.%]="20" [style.width.%]="20">
+                <mat-option *ngFor="let y of (years_start$ | async)" [value]="y">
+                    {{y}}
+                </mat-option>
+            </mat-select>
+            <mat-select #timeendselect [(ngModel)]="time_end" [style.minWidth.%]="20" [style.width.%]="20">
+                <mat-option *ngFor="let y of (years_end$ | async)" [value]="y">
+                    {{y}}
+                </mat-option>
+            </mat-select>
+            <mat-select [(ngModel)]="aggregation_fn" [style.minWidth.%]="20" [style.width.%]="20">
+                <mat-option value="sum">sum</mat-option>
+                <mat-option value="fraction">fraction</mat-option>
+                <mat-option value="mean">average</mat-option>
+            </mat-select>
+        </mat-card-content>
+    </mat-card>
+    <button mat-raised-button type="submit" color="primary"
+    [disabled]="countryLayer === undefined"
+    (click)="reload()">
+        recalculate
+    </button>
+    <wave-plot-list [style.height.px]="bottomContainerHeight$ | async" [cardHeight$]="bottomContainerHeight$" style="padding: 0"></wave-plot-list>
+</div>

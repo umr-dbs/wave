@@ -134,7 +134,6 @@ import {BoxPlotComponent} from './operators/dialogs/box-plot-operator/box-plot-o
 import {RasterPolygonClipOperatorComponent} from './operators/dialogs/raster-polygon-clip/raster-polygon-clip.component';
 import {IfGeoBonDirective} from './util/directives/if-geobon.directive';
 import {OlDrawFeaturesComponent} from './operators/dialogs/draw-features/ol-draw-features.component';
-import {CountryPolygonSelectionComponent} from './operators/dialogs/country-polygon-selection/country-polygon-selection.component';
 import { ZoomHandlesComponent } from './map/zoom-handles/zoom-handles.component';
 import {SymbologyEditorComponent} from './layers/symbology/symbology-editor/symbology-editor.component';
 import {SymbologyRasterMappingColorizerComponent} from './layers/symbology/symbology-raster/symbology-raster-mapping-colorizer.component';
@@ -142,8 +141,13 @@ import {ColorizerEditorComponent} from './colors/colorizer-editor/colorizer-edit
 import {HeatmapOperatorComponent} from './operators/dialogs/heatmap/heatmap.component';
 import {SensorSourceOperatorComponent} from './operators/dialogs/sensor-source-operator/sensor-source-operator.component';
 import {ColorBreakpointInputComponent} from './colors/color-breakpoint-component/color-breakpoint.component';
+import {TimePlotComponent} from './operators/dialogs/time-plot-operator/time-plot-operator.component';
 import {TerminologyLookupOperatorComponent} from './operators/dialogs/terminology-lookup/terminology-lookup.component';
 import {VectorSourceDatasetComponent} from './operators/dialogs/data-repository/vector/vector-source-dataset.component';
+import {EBVComponent} from './components/ebv-selection/ebv-selection.component';
+import {CountrySelectionComponent} from './components/country-selection/country-selection.component';
+import {TimeStampSelectionComponent} from './components/time-selection/stamp-selection/time-stamp-selection.component';
+import {TimeRangeSelectionComponent} from './components/time-selection/range-selection/time-range-selection.component';
 
 export function configInitializer(config: Config) {
     return () => config.load();
@@ -244,6 +248,7 @@ export function configInitializer(config: Config) {
         PieChartComponent,
         BoxPlotComponent,
         ScatterPlotComponent,
+        TimePlotComponent,
         WorkflowParameterChoiceDialogComponent,
         LayerShareComponent,
         TableComponent,
@@ -260,16 +265,18 @@ export function configInitializer(config: Config) {
         RasterPolygonClipOperatorComponent,
         FeedbackComponent,
         OlDrawFeaturesComponent,
-        CountryPolygonSelectionComponent,
         SymbologyEditorComponent,
         ColorizerEditorComponent,
         ZoomHandlesComponent,
         HeatmapOperatorComponent,
-        CountryPolygonSelectionComponent,
         SensorSourceOperatorComponent,
         ColorBreakpointInputComponent,
         TerminologyLookupOperatorComponent,
-        VectorSourceDatasetComponent
+        VectorSourceDatasetComponent,
+        EBVComponent,
+        CountrySelectionComponent,
+        TimeStampSelectionComponent,
+        TimeRangeSelectionComponent,
     ],
     imports: [
         BrowserModule,
@@ -319,6 +326,7 @@ export function configInitializer(config: Config) {
         PieChartComponent,
         ScatterPlotComponent,
         BoxPlotComponent,
+        TimePlotComponent,
         WorkflowParameterChoiceDialogComponent,
         LayerShareComponent,
         MediaviewImageComponent,
@@ -327,12 +335,15 @@ export function configInitializer(config: Config) {
         MediaviewVideoComponent,
         RasterPolygonClipOperatorComponent,
         OlDrawFeaturesComponent,
-        CountryPolygonSelectionComponent,
         SymbologyEditorComponent,
         ColorizerEditorComponent,
         HeatmapOperatorComponent,
         SensorSourceOperatorComponent,
-        TerminologyLookupOperatorComponent
+        TerminologyLookupOperatorComponent,
+        EBVComponent,
+        CountrySelectionComponent,
+        TimeStampSelectionComponent,
+        TimeRangeSelectionComponent,
     ],
     providers: [
         DragulaService,
