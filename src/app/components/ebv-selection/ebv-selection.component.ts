@@ -65,7 +65,7 @@ export class EBVComponent implements OnInit, AfterViewInit {
         this.sources.subscribe(sources => {
             for (let i in sources) {
                 let s = sources[i];
-                if (s.name === 'GEO BON') {
+                if (s.name === 'GlobalForestChange') {
                     this.ebv = observableOf(s.rasterLayer);
                     this.geobon_source = s;
                 }
