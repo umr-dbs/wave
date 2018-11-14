@@ -1,4 +1,4 @@
-import {Component, OnInit, ChangeDetectionStrategy, AfterViewInit, ViewChild, Input} from '@angular/core';
+import {Component, OnInit, ChangeDetectionStrategy, AfterViewInit, ViewChild, Input, Inject} from '@angular/core';
 import {FormGroup, FormBuilder, Validators} from '@angular/forms';
 import {VectorLayer, RasterLayer, Layer} from '../../layers/layer.model';
 import {ProjectService} from '../../project/project.service';
@@ -8,13 +8,21 @@ import {
 } from "../../layers/symbology/symbology.model";
 import {Operator} from "../../operators/operator.model";
 import {ResultTypes} from "../../operators/result-type.model";
-import {Plot} from "../../plots/plot.model";
+import {Plot, PlotData} from '../../plots/plot.model';
 import {RScriptType} from "../../operators/types/r-script-type.model";
 import {TimeStampSelectionComponent} from "../time-selection/stamp-selection/time-stamp-selection.component";
 import {RasterizePolygonType} from '../../operators/types/rasterize-polygon-type.model';
 import {ExpressionType} from '../../operators/types/expression-type.model';
 import {UserService} from '../../users/user.service';
-import {of as observableOf, Observable, BehaviorSubject} from 'rxjs';
+import {
+    of as observableOf,
+    Observable,
+    BehaviorSubject,
+    ReplaySubject,
+    Subscription,
+    Observer,
+    combineLatest as observableCombineLatest
+} from 'rxjs';
 import {MappingSource, MappingSourceRasterLayer} from '../../operators/dialogs/data-repository/mapping-source.model';
 import {DataSource} from '@angular/cdk/collections';
 import {Unit} from '../../operators/unit.model';
@@ -25,7 +33,15 @@ import {DataType, DataTypes} from '../../operators/datatype.model';
 import {TimeRangeSelectionComponent} from '../time-selection/range-selection/time-range-selection.component';
 import {LayoutService} from '../../layout.service';
 import {range} from "d3";
-import {MatSelect} from "@angular/material";
+import {MAT_DIALOG_DATA, MatDialog, MatSelect} from '@angular/material';
+import {LoadingState} from '../../project/loading-state.model';
+import {debounceTime, first, switchMap, tap} from 'rxjs/operators';
+import {Config} from '../../config.service';
+import {MappingQueryService} from '../../queries/mapping-query.service';
+import {TimeInterval} from '../../time/time.model';
+import * as moment from 'moment';
+import {NotificationService} from '../../notification.service';
+import {PlotDetailViewComponent, PlotDetailViewData} from '../../plots/plot-detail-view/plot-detail-view.component';
 
 
 @Component({
@@ -35,6 +51,10 @@ import {MatSelect} from "@angular/material";
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EBVComponent implements OnInit, AfterViewInit {
+
+    // make available in template
+    public LoadingState = LoadingState;
+    //
 
     countryLayer: VectorLayer<ComplexVectorSymbology>;
     ebvLayer: RasterLayer<RasterSymbology>;
@@ -54,10 +74,19 @@ export class EBVComponent implements OnInit, AfterViewInit {
     years_end$ = new BehaviorSubject(range(this.time_min + 1, this.time_max + 1));
     geobon_source: MappingSource;
 
+    plot: Plot = undefined;
+    plotData$ = new ReplaySubject<PlotData>(1);
+    plotDataState$ = new ReplaySubject<LoadingState>(1);
+    private plotSubscription: Subscription;
+
     constructor(private formBuilder: FormBuilder,
                 private projectService: ProjectService,
                 private userService: UserService,
-                private layoutService: LayoutService) {
+                private layoutService: LayoutService,
+                private config: Config,
+                private mappingQueryService: MappingQueryService,
+                private notificationService: NotificationService,
+                private dialog: MatDialog) {
         this.sources = this.userService.getRasterSourcesStream();
     }
 
@@ -122,7 +151,6 @@ export class EBVComponent implements OnInit, AfterViewInit {
         this.projectService.clearLayers();
         this.projectService.addLayer(this.ebvLayer);
         this.projectService.addLayer(this.countryLayer);
-        this.projectService.clearPlots();
         const countryOperator: Operator = this.countryLayer.operator;
 
         console.log(this.countryLayer);
@@ -377,12 +405,67 @@ print(p)`,
             rasterSources: [clippedLayer.operator, this.ebvLayer.operator],
             polygonSources: [this.countryLayer.operator.getProjectedOperator(this.ebvLayer.operator.projection)],
         });
-        const plot = new Plot({
+
+        this.plot = new Plot({
             name: 'Comparison',
             operator: operator,
         });
 
-        this.projectService.addPlot(plot);
+        if (this.plotSubscription) {
+            this.plotSubscription.unsubscribe();
+        }
+        this.plotSubscription = this.createPlotSubscription(this.plot, this.plotData$, this.plotDataState$);
+    }
+
+    private createPlotSubscription(plot: Plot, data$: Observer<PlotData>, loadingState$: Observer<LoadingState>): Subscription {
+        const time = new TimeInterval(moment([this.time_start]), moment([this.time_end]));
+
+        return this.layoutService.getSidenavWidthStream().pipe(
+            debounceTime(this.config.DELAYS.DEBOUNCE),
+            tap(() => loadingState$.next(LoadingState.LOADING)),
+            switchMap((sidenavWidth) => {
+                const buttonWidth = 0; // 56; // px
+                const margin = 2 * LayoutService.remInPx() + buttonWidth;
+                let plotWidth = sidenavWidth - margin;
+                let plotHeight = sidenavWidth - margin;
+
+                return this.mappingQueryService.getPlotData({
+                    operator: plot.operator,
+                    time: time,
+                    extent: plot.operator.projection.getExtent(),
+                    projection: plot.operator.projection,
+                    plotWidth: plotWidth,
+                    plotHeight: plotHeight,
+                });
+            }),
+            tap(
+                () => loadingState$.next(LoadingState.OK),
+                (reason: Response) => {
+                    this.notificationService.error(`${plot.name}: ${reason.status} ${reason.statusText}`);
+                    loadingState$.next(LoadingState.ERROR);
+                }
+            ),
+        ).subscribe(
+            data => data$.next(data),
+            error => error // ignore error
+        );
+    }
+
+    showFullscreenPlot(plot: Plot) {
+        this.plotData$.pipe(first()).subscribe(plotData => {
+            this.dialog.open(
+                PlotDetailViewComponent,
+                {
+                    data: {
+                        plot: plot,
+                        initialPlotData: plotData,
+                        time: new TimeInterval(moment([this.time_start]), moment([this.time_end])),
+                    } as PlotDetailViewData,
+                    maxHeight: '100vh',
+                    maxWidth: '100vw',
+                },
+            );
+        });
     }
 
     addClip(polygonOperator: Operator, rasterLayer: RasterLayer<RasterSymbology>): RasterLayer<RasterSymbology> {

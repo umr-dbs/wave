@@ -1,5 +1,32 @@
 @import '../../../wave-app-theme';
 
-.form {
+:host {
+    display: block;
     padding: 1rem;
+}
+
+:host > div > mat-card, :host > div > mat-select, :host > div > button {
+    margin-bottom: 1rem;
+}
+
+:host > div > button {
+    width: 100%;
+}
+
+.plot {
+    button {
+        min-width: 56px;
+    }
+
+    mat-card-actions {
+        transform: translate(-100%, 0);
+    }
+
+    mat-spinner {
+        margin: 0 auto !important;
+    }
+
+    mat-card-content {
+        width: 100%;
+    }
 }

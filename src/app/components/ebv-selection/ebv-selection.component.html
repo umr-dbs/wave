@@ -1,19 +1,16 @@
 <wave-sidenav-header>GEO-BON</wave-sidenav-header>
-<div fxLayout="column" fxLayoutAlign="space-around stretch" fxLayoutGap="1rem" style="height:100%" class="form">
-    <mat-select placeholder = "EBV Layer">
-        <mat-option *ngFor="let layer of (ebv | async)" [value]="layer.name" (click)="setEBVLayer(layer)">
-            {{layer.name}}
-        </mat-option>
-    </mat-select>
-    <mat-card *ngIf="!!geobon_source">
+<div>
+    <mat-card>
         <mat-card-header>
-            <mat-card-title>{{geobon_source.name}}</mat-card-title>
+            <mat-select placeholder = "EBV Layer">
+                <mat-option *ngFor="let layer of (ebv | async)" [value]="layer.name" (click)="setEBVLayer(layer)">
+                    {{layer.name}}
+                </mat-option>
+            </mat-select>
         </mat-card-header>
-        <mat-card-content fxLayout="row" fxLayoutAlign="space-between center">
-            <img src="{{geobon_source.imgUrl}}">
-            <p>
-                {{geobon_source.descriptionText}}
-            </p>
+        <mat-card-content fxLayout="row" fxLayoutAlign="space-between center" *ngIf="geobon_source && geobon_source.descriptionText">
+            <img src="{{geobon_source.imgUrl}}" *ngIf="geobon_source.imgUrl">
+            <p>{{geobon_source.descriptionText}}</p>
         </mat-card-content>
     </mat-card>
     <!--
@@ -56,10 +53,22 @@
             </mat-select>
         </mat-card-content>
     </mat-card>
-    <button mat-raised-button type="submit" color="primary"
-    [disabled]="countryLayer === undefined"
-    (click)="reload()">
-        recalculate
-    </button>
-    <wave-plot-list [style.height.px]="bottomContainerHeight$ | async" [cardHeight$]="bottomContainerHeight$" style="padding: 0"></wave-plot-list>
+
+    <button mat-raised-button type="submit" color="primary" [disabled]="!ebvLayer || !countryLayer" (click)="reload()">Calculate</button>
+
+    <!-- Plot -->
+    <mat-card class="plot" fxLayout="row" fxLayoutAlign="space-between" *ngIf="plot">
+        <mat-card-content *ngIf="(plotDataState$ | async) === LoadingState.LOADING">
+            <mat-spinner></mat-spinner>
+        </mat-card-content>
+        <mat-card-content style="padding-right: 1rem; margin-bottom: 0;" *ngIf="(plotDataState$ | async) === LoadingState.OK">
+            <div [style.width.px] = "(cardHeight$ | async) - 4 * 16"
+                 [style.height.px] = "(cardHeight$ | async) - 4 * 16">
+                <img src="data:image/png;base64,{{(plotData$ | async)?.data}}" alt="{{plot.name}}">
+            </div>
+        </mat-card-content>
+        <mat-card-actions *ngIf="(plotDataState$ | async) === LoadingState.OK" fxLayout="column" fxLayoutAlign="start start">
+            <button mat-button (click)="showFullscreenPlot(plot)"><mat-icon>fullscreen</mat-icon></button>
+        </mat-card-actions>
+    </mat-card>
 </div>
