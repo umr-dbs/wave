@@ -153,7 +153,7 @@ export class EBVComponent implements OnInit, AfterViewInit {
         this.projectService.addLayer(this.countryLayer);
         const countryOperator: Operator = this.countryLayer.operator;
 
-        console.log(this.countryLayer);
+        // console.log(this.countryLayer);
         const clippedLayer = this.addClip(countryOperator, this.ebvLayer);
 
 //         console.log(clippedLayer.operator.resultType);

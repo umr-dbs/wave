@@ -79,6 +79,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     middleContainerHeight$: Observable<number>;
     bottomContainerHeight$: Observable<number>;
     ebvLayer$ = new BehaviorSubject<Layer<Symbology>>(null);
+    layersResetted$: Observable<boolean>;
     layersReverse$: Observable<Array<Layer<Symbology>>>;
     // for ng-switch
     ResultTypes = ResultTypes; // tslint:disable-line:no-unused-variable variable-name
@@ -119,6 +120,11 @@ export class AppComponent implements OnInit, AfterViewInit {
 
         this.layersReverse$ = this.projectService.getLayerStream().pipe(
             map(layers => layers.slice(0).reverse()));
+        this.layersResetted$ = this.projectService.getLayerStream().pipe(
+            map(() => {
+                return true;
+            })
+        );
 
         this.layerListVisible$ = this.layoutService.getLayerListVisibilityStream();
         this.layerDetailViewVisible$ = this.layoutService.getLayerDetailViewVisibilityStream();

@@ -28,7 +28,7 @@
 
     <div class="mid-container" [style.height.px]="middleContainerHeight$ | async">
         <wave-ol-map #map>
-            <ng-template ngFor let-layer [ngForOf]='layersReverse$ | async'>
+            <ng-template ngFor let-layer [ngForOf]='layersReverse$ | async' *ngIf="layersResetted$ | async">
                 <ng-template [ngIf]="layer.operator.resultType === ResultTypes.POINTS">
                     <wave-ol-point-layer
                         [layer]="layer"
