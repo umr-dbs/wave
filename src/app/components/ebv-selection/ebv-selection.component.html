@@ -1,34 +1,25 @@
 <wave-sidenav-header>GEO-BON</wave-sidenav-header>
 <div>
-    <mat-card>
-        <mat-card-header>
-            <mat-select placeholder = "EBV Layer">
-                <mat-option *ngFor="let layer of (ebv | async)" [value]="layer.name" (click)="setEBVLayer(layer)">
+    <mat-card class="ebv-selection">
+        <mat-card-header fxLayout="row" fxLayoutAlign="space-between center"  fxLayoutGap="1rem">
+            <mat-select placeholder = "Dataset" fxFlex>
+                <mat-option *ngFor="let source of (sources | async)" [value]="source.name" (click)="selectSource(source)" [matTooltip]="source.name">
+                    {{source.name}}
+                </mat-option>
+            </mat-select>
+            <mat-select placeholder = "Metric" fxFlex>
+                <mat-option *ngFor="let layer of (ebvLayers | async)" [value]="layer.name" (click)="selectEBVLayer(layer)" [matTooltip]="layer.name">
                     {{layer.name}}
                 </mat-option>
             </mat-select>
         </mat-card-header>
         <mat-card-content fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="1rem"
-                          *ngIf="geobon_source && geobon_source.descriptionText">
-            <img src="{{geobon_source.imgUrl}}" *ngIf="geobon_source.imgUrl">
-            <p>{{geobon_source.descriptionText}}</p>
+                          *ngIf="selectedSource && selectedSource.descriptionText">
+            <img src="{{selectedSource.imgUrl}}" *ngIf="selectedSource.imgUrl">
+            <p fxFlex>{{selectedSource.descriptionText}}</p>
         </mat-card-content>
     </mat-card>
-    <!--
-    <mat-card>
-        <mat-card-header>
-            <mat-card-title>Plot-Time</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-            <wave-time-range-selection #time [time_min] = "2001" [time_max]="2012"></wave-time-range-selection>
-            <mat-radio-group [(ngModel)]="aggregation_fn" fxLayout="row" fxLayoutAlign="space-around center">
-                <mat-radio-button value="sum">sum</mat-radio-button>
-                <mat-radio-button value="fraction">fraction</mat-radio-button>
-                <mat-radio-button value="mean">average</mat-radio-button>
-            </mat-radio-group>
-        </mat-card-content>
-    </mat-card>
-    -->
+
     <mat-card>
         <mat-card-header>
             <mat-card-title>Plot Options</mat-card-title>

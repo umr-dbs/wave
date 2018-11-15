@@ -55,6 +55,34 @@ export class ProjectService {
     private plotSubscriptions: Map<Plot, Subscription>;
     private newPlot$: Subject<void>;
 
+    timeMin$ = new BehaviorSubject(2001);
+    timeMax$ = new BehaviorSubject(2012);
+    timeSelected$ = new BehaviorSubject(2007);
+
+    getTimeMin$(): Observable<number> {
+        return this.timeMin$;
+    }
+
+    getTimeMax$(): Observable<number> {
+        return this.timeMax$;
+    }
+
+    getSelectedTime$(): Observable<number> {
+        return this.timeSelected$;
+    }
+
+    setTimeMin(time: number) {
+        this.timeMin$.next(time);
+    }
+
+    setTimeMax(time: number) {
+        this.timeMax$.next(time);
+    }
+
+    setSelectedTime(time: number) {
+        this.timeSelected$.next(time);
+    }
+
     constructor(private config: Config,
                 private notificationService: NotificationService,
                 private mappingQueryService: MappingQueryService,

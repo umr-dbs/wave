@@ -11,11 +11,8 @@ import * as moment from 'moment';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TimeStampSelectionComponent implements OnInit {
-    @Input() time = 2007;
-    @Input() time_min;
-    @Input() time_max;
 
-    constructor(private projectService: ProjectService,
+    constructor(public projectService: ProjectService,
                 private changeDetector: ChangeDetectorRef) {}
 
     ngOnInit() {
@@ -48,10 +45,12 @@ export class TimeStampSelectionComponent implements OnInit {
     }
 
     setTime() {
-        this.projectService.setTime(TimePoint.fromDict({
-            start: this.time + '-01-01T00:00:00.000Z',
-            type: 'TimePoint' as TimeType
-        }));
-        this.changeDetector.detectChanges();
+        this.projectService.getSelectedTime$().subscribe(time => {
+            this.projectService.setTime(TimePoint.fromDict({
+                start: time + '-01-01T00:00:00.000Z',
+                type: 'TimePoint' as TimeType
+            }));
+            this.changeDetector.detectChanges();
+        });
     }
 }
