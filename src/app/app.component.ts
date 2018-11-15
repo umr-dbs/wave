@@ -143,8 +143,6 @@ export class AppComponent implements OnInit, AfterViewInit {
                 this.ebvLayer$.next(null);
             }
         });
-        this.projectService.clearLayers();
-        this.projectService.clearPlots();
         this.layoutService.getSidenavContentComponentStream().subscribe(sidenavConfig => {
             setTimeout(() => {
                 this.rightSidenavContainer.load(sidenavConfig);
@@ -176,6 +174,8 @@ export class AppComponent implements OnInit, AfterViewInit {
             this.handleWorkflowParameters();
 
         }
+        this.projectService.clearLayers();
+        this.projectService.clearPlots();
     }
 
     private handleWorkflowParameters() {
