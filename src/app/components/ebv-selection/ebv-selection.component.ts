@@ -182,39 +182,6 @@ export class EBVComponent implements OnInit, AfterViewInit {
         this.addComparisonPlot(clippedLayer, this.countryLayer.name, this.ebvLayer.name);
     }
 
-    code(title: string, layer_name: string): string {
-        return `library(ggplot2);
-            values = c()
-            dates = ${this.time_start}:${this.time_end}
-for (date in sprintf("%d-01-01", dates)) {
-  t1 = as.numeric(as.POSIXct(date, format="%Y-%m-%d"))
-  rect = mapping.qrect
-  rect$t1 = t1
-  rect$t2 = t1 + 0.000001
-  #print(rect$t1)
-  data = mapping.loadRaster(0, rect)
-  value = cellStats(data, stat="${this.aggregation_fn}")
-  pixels = sum(!is.na(getValues(data)))
-  percentage = value / pixels
-  values = c(values, percentage)
-}
-df = data.frame(dates, values)
-p = (
-        ggplot(df, aes(x=dates,y=values))
-        + geom_area(fill="red", alpha=.6)
-        + geom_line()
-        + geom_point()
-        + expand_limits(y=0)
-        + xlab("Year")
-        + ylab(\"${layer_name}\")
-        + ggtitle(\"${title}\")
-        + theme(text = element_text(size=20)) +
-        scale_y_continuous(labels = scales::percent) +
-        scale_x_continuous(breaks = dates)
-)
-print(p)`;
-    }
-
     addComparisonPlot(clippedLayer: RasterLayer<RasterSymbology>, title: string, layer_name: string) {
         let cellStats_fn = (this.aggregation_fn !== 'mean') ? 'sum' : 'mean';
         let pixels = function (i: number, aggregation: string) {
@@ -255,7 +222,7 @@ rect$yres = yres
 c_extent = extent(c_layer)
 dates = ${this.time_start}:${this.time_end}
 for (date in sprintf("%d-01-01", dates)) {
-  t1 = as.numeric(as.POSIXct(date, format="%Y-%m-%d"))
+  t1 = as.numeric(as.POSIXct(date, format="%Y-%m-%d", tz="GMT"))
   rect = mapping.qrect
   rect$t1 = t1
   rect$t2 = t1 + 0.000001
@@ -264,7 +231,7 @@ for (date in sprintf("%d-01-01", dates)) {
   rect$y1 = ymin(c_extent)
   rect$y2 = ymax(c_extent)
   data0 = mapping.loadRaster(0, rect)
-  value = cellStats(data0, stat="${cellStats_fn}")
+  value = cellStats(data0, stat="${cellStats_fn}", na.rm=TRUE)
   pixels = ${pixels(0, this.aggregation_fn)}
   percentage = value / pixels
   values0 = c(values0, percentage)
@@ -273,7 +240,7 @@ for (date in sprintf("%d-01-01", dates)) {
   rect$y1 = ymin
   rect$y2 = ymax
   data1 = mapping.loadRaster(1, rect)
-  value = cellStats(data1, stat="${cellStats_fn}")
+  value = cellStats(data1, stat="${cellStats_fn}", na.rm=TRUE)
   pixels = ${pixels(1, this.aggregation_fn)}
   percentage = value / pixels
   values1 = c(values1, percentage)
