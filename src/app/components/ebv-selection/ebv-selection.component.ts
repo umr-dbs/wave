@@ -134,6 +134,8 @@ export class EBVComponent implements OnInit, AfterViewInit {
 
     setCountryLayer(layer: VectorLayer<ComplexVectorSymbology>) {
         this.countryLayer = layer;
+
+        this.showLayersOnMap();
     }
 
     selectEBVLayer(channel: MappingSourceRasterLayer) {
@@ -157,21 +159,24 @@ export class EBVComponent implements OnInit, AfterViewInit {
             }),
         });
         this.ebvLayer = layer;
+
+        // show ebv on map
+        this.showLayersOnMap();
     }
 
     reload() {
-        this.projectService.clearLayers();
-        setTimeout(() => {
-            this.projectService.addLayer(this.ebvLayer);
-            this.projectService.addLayer(this.countryLayer);
-        });
+        // this.projectService.clearLayers();
+        // setTimeout(() => {
+        //     this.projectService.addLayer(this.ebvLayer);
+        //     this.projectService.addLayer(this.countryLayer);
+        // });
+        //
+        // this.projectService.setTimeMin(this.time_min);
+        // this.projectService.setTimeMax(this.time_max);
+        // this.projectService.setSelectedTime(this.time_min + Math.round(this.time_max - this.time_min) / 2);
+
         const countryOperator: Operator = this.countryLayer.operator;
-
-        this.projectService.setTimeMin(this.time_min);
-        this.projectService.setTimeMax(this.time_max);
-        this.projectService.setSelectedTime(this.time_min + Math.round(this.time_max - this.time_min) / 2);
-
-        console.log(this.countryLayer);
+        // console.log(this.countryLayer);
         const clippedLayer = this.addClip(countryOperator, this.ebvLayer);
 
         this.addComparisonPlot(clippedLayer, this.countryLayer.name, this.ebvLayer.name);
@@ -212,7 +217,7 @@ print(p)`;
 
     addComparisonPlot(clippedLayer: RasterLayer<RasterSymbology>, title: string, layer_name: string) {
         let cellStats_fn = (this.aggregation_fn !== 'mean') ? 'sum' : 'mean';
-        let pixels = function(i: number, aggregation: string) {
+        let pixels = function (i: number, aggregation: string) {
             return (aggregation === 'fraction') ? 'sum(!is.na(getValues(data' + i + ')))' : 1;
         };
         let theme = '';
@@ -447,19 +452,26 @@ print(p)`,
         return sourceOperator;
     }
 
-}
-class ChannelDataSource extends DataSource<MappingSourceRasterLayer> {
-    private channels: Array<MappingSourceRasterLayer>;
 
-    constructor(channels: Array<MappingSourceRasterLayer>) {
-        super();
-        this.channels = channels;
+    private showLayersOnMap() {
+        this.projectService.clearLayers();
+        setTimeout(() => {
+            if (this.ebvLayer) {
+                this.projectService.addLayer(this.ebvLayer);
+
+                const currentYear = this.projectService.getSelectedTime();
+
+                this.projectService.setTimeMin(this.time_min);
+                this.projectService.setTimeMax(this.time_max);
+
+                if (currentYear < this.time_min || currentYear > this.time_max) {
+                    this.projectService.setSelectedTime(this.time_min + Math.round(this.time_max - this.time_min) / 2);
+                }
+            }
+            if (this.countryLayer) {
+                this.projectService.addLayer(this.countryLayer);
+            }
+        });
     }
 
-    connect(): Observable<Array<MappingSourceRasterLayer>> {
-        return observableOf(this.channels);
-    }
-
-    disconnect() {
-    }
 }

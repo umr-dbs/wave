@@ -71,6 +71,10 @@ export class ProjectService {
         return this.timeSelected$;
     }
 
+    getSelectedTime(): number {
+        return this.timeSelected$.getValue();
+    }
+
     setTimeMin(time: number) {
         this.timeMin$.next(time);
     }
