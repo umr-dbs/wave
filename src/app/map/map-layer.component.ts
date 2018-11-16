@@ -34,12 +34,10 @@ import {isNullOrUndefined} from 'util';
 //     template: '',
 //     changeDetection: ChangeDetectionStrategy.OnPush,
 // })
-export abstract class OlMapLayerComponent<
-        OL extends ol.layer.Layer,
-        OS extends ol.source.Source,
-        S extends Symbology,
-        L extends Layer<S>
-    >
+export abstract class OlMapLayerComponent<OL extends ol.layer.Layer,
+    OS extends ol.source.Source,
+    S extends Symbology,
+    L extends Layer<S>>
     implements OnChanges {
 
     // TODO: refactor
@@ -84,13 +82,15 @@ export abstract class OlVectorLayerComponent extends OlMapLayerComponent<ol.laye
     }
 
     ngOnInit() {
-        this.dataSubscription = this.projectService.getLayerDataStream(this.layer).subscribe((x: VectorData) => {
-            // console.log("OlVectorLayerComponent dataSub", x);
-            this.source.clear(); // TODO: check if this is needed always...
-            if (!isNullOrUndefined(x)) {
-                this.source.addFeatures(x.data);
-            }
-        })
+        if (this.layer) {
+            this.dataSubscription = this.projectService.getLayerDataStream(this.layer).subscribe((x: VectorData) => {
+                // console.log("OlVectorLayerComponent dataSub", x);
+                this.source.clear(); // TODO: check if this is needed always...
+                if (!isNullOrUndefined(x)) {
+                    this.source.addFeatures(x.data);
+                }
+            })
+        }
     }
 
     ngOnChanges(changes: { [propName: string]: SimpleChange }) {
@@ -202,26 +202,52 @@ export class OlRasterLayerComponent extends OlMapLayerComponent<ol.layer.Tile, o
         let data = undefined;
         let time = undefined;
 
-        this.dataSubscription = this.projectService.getLayerDataStream(this.layer).subscribe((rasterData: RasterData) => {
-            if (isNullOrUndefined(rasterData)) {
-                // console.log("OlRasterLayerComponent constructor", rasterData);
-                return;
-            }
-
-            if (this.source) {
-                if (time !== rasterData.time.asRequestString()) {
-                    // console.log("time", time, rasterData.time.asRequestString());
-
-                    this.source.updateParams({
-                        time: rasterData.time.asRequestString(),
-                        colors: this.symbology.mappingColorizerRequestString()
-                    });
-                    time = rasterData.time.asRequestString();
+        if (this.layer) {
+            this.dataSubscription = this.projectService.getLayerDataStream(this.layer).subscribe((rasterData: RasterData) => {
+                if (isNullOrUndefined(rasterData)) {
+                    // console.log("OlRasterLayerComponent constructor", rasterData);
+                    return;
                 }
-                if (this.source.getProjection().getCode() !== rasterData.projection.getCode()) {
-                    // console.log("projection", this.source.getProjection().getCode, rasterData.projection.getCode());
 
-                    // unfortunally there is no setProjection function, so reset the whole source
+                if (this.source) {
+                    if (time !== rasterData.time.asRequestString()) {
+                        // console.log("time", time, rasterData.time.asRequestString());
+
+                        this.source.updateParams({
+                            time: rasterData.time.asRequestString(),
+                            colors: this.symbology.mappingColorizerRequestString()
+                        });
+                        time = rasterData.time.asRequestString();
+                    }
+                    if (this.source.getProjection().getCode() !== rasterData.projection.getCode()) {
+                        // console.log("projection", this.source.getProjection().getCode, rasterData.projection.getCode());
+
+                        // unfortunally there is no setProjection function, so reset the whole source
+                        this.source = new OlSourceTileWMS({
+                            url: rasterData.data,
+                            params: {
+                                time: rasterData.time.asRequestString(),
+                                colors: this.symbology.mappingColorizerRequestString()
+                            },
+                            projection: rasterData.projection.getCode(),
+                            wrapX: false,
+                        });
+
+                        if (this._mapLayer) {
+                            this._mapLayer.setSource(this.source);
+                        }
+                    }
+                    if (data !== rasterData.data) {
+                        // console.log("data", data, rasterData.data);
+
+                        this.source.setUrl(rasterData.data);
+                        data = rasterData.data;
+                    }
+
+                    if (this.config.MAP.REFRESH_LAYERS_ON_CHANGE) {
+                        this.source.refresh();
+                    }
+                } else {
                     this.source = new OlSourceTileWMS({
                         url: rasterData.data,
                         params: {
@@ -231,63 +257,39 @@ export class OlRasterLayerComponent extends OlMapLayerComponent<ol.layer.Tile, o
                         projection: rasterData.projection.getCode(),
                         wrapX: false,
                     });
-
-                    if (this._mapLayer) {
-                        this._mapLayer.setSource(this.source);
-                    }
-                }
-                if (data !== rasterData.data) {
-                    // console.log("data", data, rasterData.data);
-
-                    this.source.setUrl(rasterData.data);
                     data = rasterData.data;
+                    time = rasterData.time.asRequestString();
                 }
 
-                if (this.config.MAP.REFRESH_LAYERS_ON_CHANGE) {
-                    this.source.refresh();
+                if (this._mapLayer) {
+                    this._mapLayer.setSource(this.source);
+                } else {
+                    this._mapLayer = new OlLayerTile({
+                        source: this.source,
+                        opacity: this.symbology.opacity,
+                    });
                 }
-            } else {
-                this.source = new OlSourceTileWMS({
-                    url: rasterData.data,
-                    params: {
-                        time: rasterData.time.asRequestString(),
-                        colors: this.symbology.mappingColorizerRequestString()
-                    },
-                    projection: rasterData.projection.getCode(),
-                    wrapX: false,
-                });
-                data = rasterData.data;
-                time = rasterData.time.asRequestString();
-            }
 
-            if (this._mapLayer) {
-                this._mapLayer.setSource(this.source);
-            } else {
-                this._mapLayer = new OlLayerTile({
-                    source: this.source,
-                    opacity: this.symbology.opacity,
-                });
-            }
+            });
 
-        });
+            // TILE LOADING STATE
+            let tilesPending = 0;
 
-        // TILE LOADING STATE
-        let tilesPending = 0;
-
-        this.source.on('tileloadstart', () => {
-            tilesPending++;
-            this.projectService.changeRasterLayerDataStatus(this.layer, LoadingState.LOADING);
-        });
-        this.source.on('tileloadend', () => {
-            tilesPending--;
-            if (tilesPending <= 0) {
-                this.projectService.changeRasterLayerDataStatus(this.layer, LoadingState.OK);
-            }
-        });
-        this.source.on('tileloaderror', () => {
-            tilesPending--;
-            this.projectService.changeRasterLayerDataStatus(this.layer, LoadingState.ERROR);
-        });
+            this.source.on('tileloadstart', () => {
+                tilesPending++;
+                this.projectService.changeRasterLayerDataStatus(this.layer, LoadingState.LOADING);
+            });
+            this.source.on('tileloadend', () => {
+                tilesPending--;
+                if (tilesPending <= 0) {
+                    this.projectService.changeRasterLayerDataStatus(this.layer, LoadingState.OK);
+                }
+            });
+            this.source.on('tileloaderror', () => {
+                tilesPending--;
+                this.projectService.changeRasterLayerDataStatus(this.layer, LoadingState.ERROR);
+            });
+        }
     }
 
     ngOnChanges(changes: { [propName: string]: SimpleChange }) {

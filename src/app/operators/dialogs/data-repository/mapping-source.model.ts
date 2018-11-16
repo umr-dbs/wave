@@ -1,6 +1,7 @@
 import {Unit, UnitMappingDict} from '../../unit.model';
 import {MappingRasterColorizerDict} from '../../../colors/colorizer-data.model';
 import {IColorizerData} from '../../../colors/colorizer-data.model';
+import * as moment from 'moment';
 
 export interface MappingTransform {
   datatype: string;
@@ -43,7 +44,7 @@ export interface MappingSourceVectorLayer {
     textual: string[];
     numeric: string[];
     coords: {
-        crs: string
+        crs: string,
     };
     colorizer?: IColorizerData;
     provenance: ProvenanceInfo;
@@ -57,6 +58,9 @@ export interface MappingSource {
     vectorLayer?: MappingSourceVectorLayer[];
     descriptionText?: string;
     imgUrl?: string;
+    tags?: Array<string>;
+    time_start?: moment.Moment;
+    time_end?: moment.Moment;
     provenance: ProvenanceInfo;
 }
 
@@ -65,6 +69,9 @@ export interface MappingSourceDict {
     name: string,
     descriptionText?: string,
     imgUrl?: string,
+    tags?: Array<string>;
+    time_start?: string;
+    time_end?: string;
     colorizer?: MappingRasterColorizerDict,
     provenance?: {
         uri: string,

@@ -35,6 +35,7 @@ import {
 } from '../queries/feature-db.model';
 import {NotificationService} from '../notification.service';
 import {ColorizerData} from '../colors/colorizer-data.model';
+import * as moment from 'moment';
 
 const PATH_PREFIX = window.location.pathname.replace(/\//g, '_').replace(/-/g, '_');
 
@@ -653,6 +654,9 @@ export class UserService {
                                     provenance: sourceProvenance,
                                     descriptionText: source.descriptionText,
                                     imgUrl: source.imgUrl,
+                                    tags: source.tags,
+                                    time_start: source.time_start ? moment.utc(source.time_start) : undefined,
+                                    time_end: source.time_end ? moment.utc(source.time_end) : undefined,
                                 });
                             }
                         }

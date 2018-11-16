@@ -1,12 +1,13 @@
 <div class="container" fxLayout="row" fxLayoutAlign="space-between center" style="width:100%">
-    <span>{{time_min}}</span>
+    <span>{{projectService.getTimeMin$() | async}}</span>
     <mat-slider style="width:100%;"
                 mat-discrete
-                [(ngModel)]="time"
-                max="{{time_max}}"
-                min="{{time_min}}"
+                [ngModel]="projectService.getSelectedTime$() | async" (ngModelChange)="projectService.setSelectedTime($event)"
+                [max]="projectService.getTimeMax$() | async"
+                [min]="projectService.getTimeMin$() | async"
                 tickInterval="1"
                 step="1"
+                thumbLabel="true"
                 (change)="setTime()"></mat-slider>
-    <span>{{time_max}}</span>
+    <span>{{projectService.getTimeMax$() | async}}</span>
 </div>
