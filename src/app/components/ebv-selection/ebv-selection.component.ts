@@ -255,6 +255,7 @@ p = (
         + expand_limits(y=0)
         + xlab("Year")
         + ylab(\"${layer_name}\")
+        + scale_x_continuous(breaks = scales::pretty_breaks())
         + ggtitle("${title} - global")
         + theme(text = element_text(size=20))
         ${theme}
