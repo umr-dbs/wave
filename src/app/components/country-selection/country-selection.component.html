@@ -1,11 +1,16 @@
 <mat-select *ngIf="!(isLoading$ | async)" placeholder = "Country">
-    <mat-option
-        *ngFor="let entry of (filteredEntries$ | async)"
-        (click)="addLayer(entry[sourceIdColumn], createFilterOperator(entry[sourceIdColumn]))"
-        [value]="entry[sourceIdColumn]"
-    >
-        {{entry[sourceIdColumn]}}
+    <mat-option (click)="layer.emit('global')" [value]="'global'">
+        Global
     </mat-option>
+    <mat-optgroup [label]="'Country'">
+        <mat-option
+            *ngFor="let entry of (filteredEntries$ | async)"
+            (click)="addLayer(entry[sourceIdColumn], createFilterOperator(entry[sourceIdColumn]))"
+            [value]="entry[sourceIdColumn]"
+        >
+            {{entry[sourceIdColumn]}}
+        </mat-option>
+    </mat-optgroup>
 </mat-select>
 
 <div *ngIf="(isLoading$ | async);" class="loading">

@@ -46,7 +46,7 @@
         </mat-card-content>
     </mat-card>
 
-    <button mat-raised-button type="submit" color="primary" [disabled]="!ebvLayer || !countryLayer" (click)="reload()">Calculate</button>
+    <button mat-raised-button type="submit" color="primary" [disabled]="!ebvLayer || (!countryLayer && isCountryLayer)" (click)="reload()">Calculate</button>
 
     <!-- Plot -->
     <mat-card class="plot" fxLayout="row" fxLayoutAlign="space-between" *ngIf="plot">

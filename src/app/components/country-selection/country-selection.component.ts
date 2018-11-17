@@ -47,7 +47,7 @@ export class CountrySelectionComponent implements OnInit, OnDestroy {
 
     isLoading$ = new BehaviorSubject(true);
 
-    @Output() layer: EventEmitter<VectorLayer<ComplexVectorSymbology>> = new EventEmitter();
+    @Output() layer: EventEmitter<VectorLayer<ComplexVectorSymbology> | string> = new EventEmitter();
 
     /*
     {
@@ -64,7 +64,7 @@ export class CountrySelectionComponent implements OnInit, OnDestroy {
  	}
      */
 
-    private sourceFile = 'file:///home/gfbio/data/dev/csv_source/countries_simple.csv';
+    private sourceFile = 'file:///home/gfbio/data/dev/csv_source/country_borders.csv';
     private sourceParameters: CSVParameters = {
         header: 0,
         onError: 'keep',
@@ -73,13 +73,19 @@ export class CountrySelectionComponent implements OnInit, OnDestroy {
         time: 'none',
         columns: {
             x: 'WKT',
-            numeric : [],
-            textual: ['NAME'],
+            textual: ['FIPS', 'ISO2', 'ISO3', 'UN', 'NAME'],
+            numeric: ['AREA', 'POP2005', 'REGION', 'SUBREGION', 'LON', 'LAT'],
         },
         provenance: {
-            citation: ``,
+            citation: `TM_WORLD_BORDERS-0.1.ZIP
+ Provided by Bjorn Sandvik, thematicmapping.org
+ Use this dataset with care, as several of the borders are disputed.
+ The original shapefile (world_borders.zip, 3.2 MB) was downloaded from the Mapping Hacks website:
+http://www.mappinghacks.com/data/
+ The dataset was derived by Schuyler Erle from public domain sources.
+Sean Gilles did some clean up and made some enhancements.`,
             uri: '',
-            license: '',
+            license: 'Creative Commons Attribution-Share Alike License 3.0',
         },
     };
     private sourceProjection: Projection = Projections.WGS_84;
@@ -98,19 +104,19 @@ export class CountrySelectionComponent implements OnInit, OnDestroy {
         this.sourceOperator = this.createCsvSourceOperator();
 
         this.subscription = observableCombineLatest(
-                this.getOperatorDataStream().pipe(map(
-                    vectorData => {
-                        // console.log('vectorData', vectorData);
-                        const data = vectorData.data.map(olFeature => olFeature.getProperties() as { [k: string]: any });
-                        // console.log('mapped', data);
-                        return data;
-                    }
-                )),
-                this.searchString$.pipe(map(searchString => searchString.toLowerCase())),
-                (entries, searchString) => entries
-                    .filter(entry => entry[this.sourceIdColumn].toString().toLowerCase().indexOf(searchString) >= 0)
-                    .sort((a, b) => nameComparator(a[this.sourceIdColumn].toString(), b[this.sourceIdColumn].toString()))
-            ).pipe(
+            this.getOperatorDataStream().pipe(map(
+                vectorData => {
+                    // console.log('vectorData', vectorData);
+                    const data = vectorData.data.map(olFeature => olFeature.getProperties() as { [k: string]: any });
+                    // console.log('mapped', data);
+                    return data;
+                }
+            )),
+            this.searchString$.pipe(map(searchString => searchString.toLowerCase())),
+            (entries, searchString) => entries
+                .filter(entry => entry[this.sourceIdColumn].toString().toLowerCase().indexOf(searchString) >= 0)
+                .sort((a, b) => nameComparator(a[this.sourceIdColumn].toString(), b[this.sourceIdColumn].toString()))
+        ).pipe(
             tap(() => this.isLoading$.next(false)))
             .subscribe(entries => this.filteredEntries$.next(entries));
 

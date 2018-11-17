@@ -50,6 +50,7 @@ export class EBVComponent implements OnInit, AfterViewInit {
     ebvLayer: RasterLayer<RasterSymbology>;
 
     countryLayer: VectorLayer<ComplexVectorSymbology>;
+    isCountryLayer = true;
 
     @ViewChild('timestartselect') time_start_select: MatSelect;
     @ViewChild('timeendselect') time_end_select: MatSelect;
@@ -132,9 +133,11 @@ export class EBVComponent implements OnInit, AfterViewInit {
         });
     }
 
-    setCountryLayer(layer: VectorLayer<ComplexVectorSymbology>) {
-        this.countryLayer = layer;
-
+    setCountryLayer(layer: VectorLayer<ComplexVectorSymbology> | string) {
+        this.isCountryLayer = !(typeof layer === 'string');
+        if (this.isCountryLayer) {
+            this.countryLayer = layer;
+        }
         this.showLayersOnMap();
     }
 
@@ -175,27 +178,31 @@ export class EBVComponent implements OnInit, AfterViewInit {
         // this.projectService.setTimeMax(this.time_max);
         // this.projectService.setSelectedTime(this.time_min + Math.round(this.time_max - this.time_min) / 2);
 
-        const countryOperator: Operator = this.countryLayer.operator;
         // console.log(this.countryLayer);
-        const clippedLayer = this.addClip(countryOperator, this.ebvLayer);
+        const clippedLayer = this.isCountryLayer ? this.addClip(this.countryLayer.operator, this.ebvLayer) : null;
 
-        this.addComparisonPlot(clippedLayer, this.countryLayer.name, this.ebvLayer.name);
+        this.addComparisonPlot(clippedLayer, this.isCountryLayer ? this.countryLayer.name : 'Global', this.ebvLayer.name);
     }
 
     addComparisonPlot(clippedLayer: RasterLayer<RasterSymbology>, title: string, layer_name: string) {
         let cellStats_fn = (this.aggregation_fn !== 'mean') ? 'sum' : 'mean';
-        let pixels = function (i: number, aggregation: string) {
-            return (aggregation === 'fraction') ? 'sum(!is.na(getValues(data' + i + ')))' : 1;
+        let pixels = function (aggregation: string) {
+            return (aggregation === 'fraction') ? 'sum(!is.na(getValues(data)))' : 1;
         };
         let theme = '';
         if (this.aggregation_fn === 'fraction') {
             theme = '        + scale_y_continuous(labels = scales::percent) +\n        scale_x_continuous(breaks = dates)'
         }
+        const polygon = (this.isCountryLayer ? `
+c_layer = mapping.loadPolygons(0, rect)
+rect$xres = xres
+rect$yres = yres
+c_extent = extent(c_layer)` : '');
+        const extent = this.isCountryLayer ? '(c_extent)' : '';
         const operator: Operator = new Operator({
             operatorType: new RScriptType({
                 code: `library(ggplot2)
-values0 = c()
-values1 = c()
+values = c()
 rect = mapping.qrect
 if (rect$crs == "EPSG:3857") {
   xmin = -20026376.39
@@ -215,40 +222,26 @@ rect$yres = 0
 rect$x1 = xmin
 rect$x2 = xmax
 rect$y1 = ymin
-rect$y2 = ymax
-c_layer = mapping.loadPolygons(0, rect)
-rect$xres = xres
-rect$yres = yres
-c_extent = extent(c_layer)
+rect$y2 = ymax${polygon}
 dates = ${this.time_start}:${this.time_end}
 for (date in sprintf("%d-01-01", dates)) {
   t1 = as.numeric(as.POSIXct(date, format="%Y-%m-%d", tz="GMT"))
   rect = mapping.qrect
   rect$t1 = t1
   rect$t2 = t1 + 0.000001
-  rect$x1 = xmin(c_extent)
-  rect$x2 = xmax(c_extent)
-  rect$y1 = ymin(c_extent)
-  rect$y2 = ymax(c_extent)
-  data0 = mapping.loadRaster(0, rect)
-  value = cellStats(data0, stat="${cellStats_fn}", na.rm=TRUE)
-  pixels = ${pixels(0, this.aggregation_fn)}
+  rect$x1 = xmin${extent}
+  rect$x2 = xmax${extent}
+  rect$y1 = ymin${extent}
+  rect$y2 = ymax${extent}
+  data = mapping.loadRaster(0, rect)
+  value = cellStats(data, stat="${cellStats_fn}", na.rm=TRUE)
+  pixels = ${pixels(this.aggregation_fn)}
   percentage = value / pixels
-  values0 = c(values0, percentage)
-  rect$x1 = xmin
-  rect$x2 = xmax
-  rect$y1 = ymin
-  rect$y2 = ymax
-  data1 = mapping.loadRaster(1, rect)
-  value = cellStats(data1, stat="${cellStats_fn}", na.rm=TRUE)
-  pixels = ${pixels(1, this.aggregation_fn)}
-  percentage = value / pixels
-  values1 = c(values1, percentage)
+  values = c(values, percentage)
 }
-df = data.frame(dates, global = values1, ${title} = values0)
-df = reshape2::melt(df, id.var='dates')
+df = data.frame(dates, values)
 p = (
-        ggplot(df, aes(x = dates, y = value, col = variable, fill = variable))
+        ggplot(df, aes(x = dates, y = values))
         #+ geom_area()
         + geom_line()
         + geom_point()
@@ -256,17 +249,21 @@ p = (
         + xlab("Year")
         + ylab(\"${layer_name}\")
         + scale_x_continuous(breaks = scales::pretty_breaks())
-        + ggtitle("${title} - global")
-        + theme(text = element_text(size=20))
+        + ggtitle("${title} - ${this.aggregation_fn}")
+        + theme(title = element_text(colour="black", size=20),
+        axis.text.x = element_text(colour="grey20",size=12,angle=90,hjust=.5,vjust=.5,face="plain"),
+        axis.text.y = element_text(colour="grey20",size=12,angle=0,hjust=1,vjust=0,face="plain"),
+        axis.title.x = element_text(colour="grey20",size=12,angle=0,hjust=.5,vjust=0,face="plain"),
+        axis.title.y = element_text(colour="grey20",size=12,angle=90,hjust=.5,vjust=.5,face="plain"))
         ${theme}
 )
 print(p)`,
                 resultType: ResultTypes.PLOT,
             }),
             resultType: ResultTypes.PLOT,
-            projection: clippedLayer.operator.projection,
-            rasterSources: [clippedLayer.operator, this.ebvLayer.operator],
-            polygonSources: [this.countryLayer.operator.getProjectedOperator(this.ebvLayer.operator.projection)],
+            projection: this.isCountryLayer ? clippedLayer.operator.projection : this.ebvLayer.operator.projection,
+            rasterSources: [this.isCountryLayer ? clippedLayer.operator : this.ebvLayer.operator],
+            polygonSources: this.isCountryLayer ? [this.countryLayer.operator.getProjectedOperator(this.ebvLayer.operator.projection)] : [],
         });
 
         this.plot = new Plot({
@@ -435,7 +432,7 @@ print(p)`,
                     this.projectService.setSelectedTime(this.time_min + Math.round(this.time_max - this.time_min) / 2);
                 }
             }
-            if (this.countryLayer) {
+            if (this.countryLayer && this.isCountryLayer) {
                 this.projectService.addLayer(this.countryLayer);
             }
         });
