@@ -136,7 +136,7 @@ export class EBVComponent implements OnInit, AfterViewInit {
     setCountryLayer(layer: VectorLayer<ComplexVectorSymbology> | string) {
         this.isCountryLayer = !(typeof layer === 'string');
         if (this.isCountryLayer) {
-            this.countryLayer = layer;
+            this.countryLayer = (layer as VectorLayer<ComplexVectorSymbology>);
         }
         this.showLayersOnMap();
     }
