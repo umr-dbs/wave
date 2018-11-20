@@ -618,6 +618,9 @@ export class UserService {
                                             } as MappingTransform,
                                         coords: coords,
                                         provenance: provenance,
+                                        time_interval: channel.time_interval,
+                                        time_start: channel.time_start ? moment.utc(channel.time_start): undefined,
+                                        time_end: channel.time_end ? moment.utc(channel.time_end) : undefined,
                                     } as MappingSourceRasterLayer;
                                 });
 

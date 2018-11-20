@@ -68,6 +68,7 @@ export class EBVComponent implements OnInit, AfterViewInit {
     plotData$ = new ReplaySubject<PlotData>(1);
     plotDataState$ = new ReplaySubject<LoadingState>(1);
     private plotSubscription: Subscription;
+    private ebvChannel: MappingSourceRasterLayer;
 
     constructor(private formBuilder: FormBuilder,
                 private projectService: ProjectService,
@@ -104,9 +105,42 @@ export class EBVComponent implements OnInit, AfterViewInit {
             source.rasterLayer
         );
         this.ebvLayer = undefined;
+    }
 
-        this.time_min = source.time_start ? source.time_start.year() : 1900;
-        this.time_max = source.time_end ? source.time_end.year() : 2018;
+    setCountryLayer(layer: VectorLayer<ComplexVectorSymbology> | string) {
+        this.isCountryLayer = !(typeof layer === 'string');
+        if (this.isCountryLayer) {
+            this.countryLayer = (layer as VectorLayer<ComplexVectorSymbology>);
+        }
+        this.showLayersOnMap();
+    }
+
+    selectEBVLayer(channel: MappingSourceRasterLayer) {
+
+        const unit: Unit = channel.unit;
+        const mappingTransformation = channel.transform;
+        const doTransform = channel.hasTransform;
+
+        let operator = this.createGdalSourceOperator(channel, doTransform);
+
+        let colorizerConfig = channel.colorizer;
+        if (doTransform) {
+            colorizerConfig = SourceDatasetComponent.createAndTransformColorizer(colorizerConfig, mappingTransformation);
+        }
+
+        const layer = new RasterLayer({
+            name: channel.name,
+            operator: operator,
+            symbology: new MappingColorizerRasterSymbology({
+                unit: (doTransform) ? channel.transform.unit : unit,
+                colorizer: colorizerConfig,
+            }),
+        });
+        this.ebvLayer = layer;
+        this.ebvChannel = channel;
+
+        this.time_min = channel.time_start ? channel.time_start.year() : this.selectedSource.time_start ? this.selectedSource.time_start.year() : 1900;
+        this.time_max = channel.time_end ? channel.time_end.year() : this.selectedSource.time_end ? this.selectedSource.time_end.year() : 2018;
 
         console.log(this.time_min, this.time_max, this.time_start, this.time_end);
 
@@ -131,37 +165,6 @@ export class EBVComponent implements OnInit, AfterViewInit {
 
             setTimeout(() => console.log(this.time_start, this.time_end));
         });
-    }
-
-    setCountryLayer(layer: VectorLayer<ComplexVectorSymbology> | string) {
-        this.isCountryLayer = !(typeof layer === 'string');
-        if (this.isCountryLayer) {
-            this.countryLayer = (layer as VectorLayer<ComplexVectorSymbology>);
-        }
-        this.showLayersOnMap();
-    }
-
-    selectEBVLayer(channel: MappingSourceRasterLayer) {
-        const unit: Unit = channel.unit;
-        const mappingTransformation = channel.transform;
-        const doTransform = channel.hasTransform;
-
-        let operator = this.createGdalSourceOperator(channel, doTransform);
-
-        let colorizerConfig = channel.colorizer;
-        if (doTransform) {
-            colorizerConfig = SourceDatasetComponent.createAndTransformColorizer(colorizerConfig, mappingTransformation);
-        }
-
-        const layer = new RasterLayer({
-            name: channel.name,
-            operator: operator,
-            symbology: new MappingColorizerRasterSymbology({
-                unit: (doTransform) ? channel.transform.unit : unit,
-                colorizer: colorizerConfig,
-            }),
-        });
-        this.ebvLayer = layer;
 
         // show ebv on map
         this.showLayersOnMap();
@@ -199,6 +202,19 @@ rect$xres = xres
 rect$yres = yres
 c_extent = extent(c_layer)` : '');
         const extent = this.isCountryLayer ? '(c_extent)' : '';
+
+        let dates = '';
+        if(this.ebvChannel.time_interval && this.ebvChannel.time_interval.unit.toLowerCase() === "year") {
+            dates = `dates = seq(
+  floor((${this.time_start}-${this.selectedSource.time_start.year()})/${this.ebvChannel.time_interval.value})*${this.ebvChannel.time_interval.value} + ${this.selectedSource.time_start.year()}, 
+  ceiling((${this.time_end}-${this.selectedSource.time_start.year()})/${this.ebvChannel.time_interval.value})*${this.ebvChannel.time_interval.value} + ${this.selectedSource.time_start.year()}, 
+${this.ebvChannel.time_interval.value})
+dates[length(dates)] = min(dates[length(dates)], ${this.selectedSource.time_end.year()})`;
+        } else {
+            dates = `dates = ${this.time_start}:${this.time_end}`;
+        }
+
+
         const operator: Operator = new Operator({
             operatorType: new RScriptType({
                 code: `library(ggplot2)
@@ -223,7 +239,7 @@ rect$x1 = xmin
 rect$x2 = xmax
 rect$y1 = ymin
 rect$y2 = ymax${polygon}
-dates = ${this.time_start}:${this.time_end}
+${dates}
 for (date in sprintf("%d-01-01", dates)) {
   t1 = as.numeric(as.POSIXct(date, format="%Y-%m-%d", tz="GMT"))
   rect = mapping.qrect
@@ -248,7 +264,8 @@ p = (
         + expand_limits(y=0)
         + xlab("Year")
         + ylab(\"${layer_name}\")
-        + scale_x_continuous(breaks = scales::pretty_breaks())
+        + scale_x_continuous(breaks = scales::pretty_breaks()(${this.time_start}:${this.time_end}))
+        + coord_cartesian(xlim = c(${this.time_start},${this.time_end}))
         + ggtitle("${title} - ${this.aggregation_fn}")
         + theme(title = element_text(colour="black", size=20),
         axis.text.x = element_text(colour="grey20",size=12,angle=90,hjust=.5,vjust=.5,face="plain"),

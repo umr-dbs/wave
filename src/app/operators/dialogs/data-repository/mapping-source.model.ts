@@ -16,6 +16,11 @@ export interface ProvenanceInfo {
     citation: string;
 }
 
+export interface TimeInterval {
+    unit: string;
+    value: number;
+}
+
 export interface MappingSourceRasterLayer {
     name: string;
     id: number;
@@ -34,6 +39,9 @@ export interface MappingSourceRasterLayer {
         size: number[],
     };
     provenance: ProvenanceInfo;
+    time_interval: TimeInterval;
+    time_start?: moment.Moment;
+    time_end?: moment.Moment;
 }
 
 export interface MappingSourceVectorLayer {
@@ -108,6 +116,9 @@ export interface MappingSourceDict {
             license: string,
             citation: string,
         }
+        time_interval?: TimeInterval,
+        time_start?: string,
+        time_end?: string,
     }];
     layer?: [{
         id?: number | string,
