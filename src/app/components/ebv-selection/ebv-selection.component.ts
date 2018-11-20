@@ -206,10 +206,10 @@ c_extent = extent(c_layer)` : '');
         let dates = '';
         if(this.ebvChannel.time_interval && this.ebvChannel.time_interval.unit.toLowerCase() === "year") {
             dates = `dates = seq(
-  floor((${this.time_start}-${this.selectedSource.time_start.year()})/${this.ebvChannel.time_interval.value})*${this.ebvChannel.time_interval.value} + ${this.selectedSource.time_start.year()}, 
-  ceiling((${this.time_end}-${this.selectedSource.time_start.year()})/${this.ebvChannel.time_interval.value})*${this.ebvChannel.time_interval.value} + ${this.selectedSource.time_start.year()}, 
+  floor((${this.time_start}-${this.time_min})/${this.ebvChannel.time_interval.value})*${this.ebvChannel.time_interval.value} + ${this.time_min}, 
+  ceiling((${this.time_end}-${this.time_min})/${this.ebvChannel.time_interval.value})*${this.ebvChannel.time_interval.value} + ${this.time_min}, 
 ${this.ebvChannel.time_interval.value})
-dates[length(dates)] = min(dates[length(dates)], ${this.selectedSource.time_end.year()})`;
+dates[length(dates)] = min(dates[length(dates)], ${this.time_max})`;
         } else {
             dates = `dates = ${this.time_start}:${this.time_end}`;
         }
