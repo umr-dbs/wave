@@ -440,14 +440,29 @@ print(p)`,
             if (this.ebvLayer) {
                 this.projectService.addLayer(this.ebvLayer);
 
-                const currentYear = this.projectService.getSelectedTime();
+                let currentYear = this.projectService.getSelectedTime();
+                let step = 1;
+
+                if (!this.ebvChannel.time_interval) {
+                    currentYear = this.time_max;
+                    step = this.time_max - this.time_min;
+                } else {
+                    step = this.ebvChannel.time_interval ? this.ebvChannel.time_interval.value : 1;
+
+                    if (currentYear < this.time_min || currentYear > this.time_max) {
+                        currentYear = this.time_min + Math.round(this.time_max - this.time_min) / 2;
+                    }
+
+                    currentYear = this.time_min + Math.floor((currentYear - this.time_min) / step) * step;
+                }
+
+                this.projectService.setSelectedTime(currentYear);
 
                 this.projectService.setTimeMin(this.time_min);
                 this.projectService.setTimeMax(this.time_max);
 
-                if (currentYear < this.time_min || currentYear > this.time_max) {
-                    this.projectService.setSelectedTime(this.time_min + Math.round(this.time_max - this.time_min) / 2);
-                }
+
+                this.projectService.setTimeInterval(step);
             }
             if (this.countryLayer && this.isCountryLayer) {
                 this.projectService.addLayer(this.countryLayer);

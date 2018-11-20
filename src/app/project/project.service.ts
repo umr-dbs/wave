@@ -58,6 +58,7 @@ export class ProjectService {
     timeMin$ = new BehaviorSubject(2001);
     timeMax$ = new BehaviorSubject(2012);
     timeSelected$ = new BehaviorSubject(2007);
+    timeInterval$ = new BehaviorSubject(1);
 
     getTimeMin$(): Observable<number> {
         return this.timeMin$;
@@ -75,6 +76,10 @@ export class ProjectService {
         return this.timeSelected$.getValue();
     }
 
+    getTimeInterval$() : Observable<number> {
+        return this.timeInterval$;
+    }
+
     setTimeMin(time: number) {
         this.timeMin$.next(time);
     }
@@ -85,6 +90,10 @@ export class ProjectService {
 
     setSelectedTime(time: number) {
         this.timeSelected$.next(time);
+    }
+
+    setTimeInterval(interval: number) {
+        this.timeInterval$.next(interval);
     }
 
     constructor(private config: Config,

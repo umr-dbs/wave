@@ -6,7 +6,7 @@
                 [max]="projectService.getTimeMax$() | async"
                 [min]="projectService.getTimeMin$() | async"
                 tickInterval="1"
-                step="1"
+                [step]="projectService.getTimeInterval$() | async"
                 thumbLabel="true"
                 (change)="setTime()"></mat-slider>
     <span>{{projectService.getTimeMax$() | async}}</span>
