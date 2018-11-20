@@ -162,11 +162,11 @@ export class AppComponent implements OnInit, AfterViewInit {
         this.layoutService.setSidenavContentComponent({component: EBVComponent});
 
         // show splash screen
-        if (this.userService.shouldShowIntroductoryPopup()) {
-            setTimeout(() => {
-                this.dialog.open(SplashDialogComponent, {});
-            });
-        }
+        // if (this.userService.shouldShowIntroductoryPopup()) {
+        //     setTimeout(() => {
+        //         this.dialog.open(SplashDialogComponent, {});
+        //     });
+        // }
 
         // notify window parent that this component is ready
         if (parent !== window) {
