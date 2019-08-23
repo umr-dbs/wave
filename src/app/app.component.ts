@@ -206,8 +206,13 @@ export class AppComponent implements OnInit, AfterViewInit {
                             const newLayer = Layer.fromDict(JSON.parse(value));
                             this.projectService.getProjectStream().first().subscribe(project => {
                                 if (project.layers.length > 0) {
-                                    // show popup
-                                    this.dialog.open(WorkflowParameterChoiceDialogComponent, {data: {layers: [newLayer]}});
+                                    // close all other popups
+                                    // TODO: open popup when other/previous popup is closed
+                                    this.dialog.closeAll();
+                                    this.dialog.afterAllClosed.first().subscribe(() => {
+                                        // show popup
+                                        this.dialog.open(WorkflowParameterChoiceDialogComponent, {data: {layers: [newLayer]}});
+                                    });
                                 } else {
                                     // just add the layer if the layer array is empty
                                     this.projectService.addLayer(newLayer);
