@@ -33,6 +33,8 @@ export class LoginComponent implements OnInit, AfterViewInit {
     user: Observable<User>;
     invalidCredentials$ = new BehaviorSubject<boolean>(false);
 
+    appInIframe = this.isAppInIframe();
+
     constructor(private formBuilder: FormBuilder,
                 private config: Config,
                 private userService: UserService,
@@ -126,6 +128,14 @@ export class LoginComponent implements OnInit, AfterViewInit {
                     this.formStatus$.next(FormStatus.LoggedOut);
                 },
                 error => this.notificationService.error(`The backend is currently unavailable (${error})`));
+    }
+
+    private isAppInIframe () {
+        try {
+            return window.self !== window.top;
+        } catch (e) {
+            return true;
+        }
     }
 
 }

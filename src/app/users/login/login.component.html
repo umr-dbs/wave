@@ -1,23 +1,29 @@
 <ng-template [ngIf]="isLoggedOut$ | async">
     <wave-sidenav-header>Login</wave-sidenav-header>
     <form [formGroup]="loginForm" (ngSubmit)="$event.preventDefault();login()">
-        <mat-button-toggle-group *waveIfGfbio formControlName="loginAuthority" fxLayout="row">
+        <mat-button-toggle-group *ngIf="false" formControlName="loginAuthority" fxLayout="row">
             <mat-button-toggle value="system" fxFlex>System</mat-button-toggle>
             <mat-button-toggle value="gfbio" fxFlex><img src="assets/logo_gfbio.png" alt="GFBio"></mat-button-toggle>
         </mat-button-toggle-group>
-        <mat-card class="info" *ngIf="loginForm.controls.loginAuthority.value === 'gfbio'">
-            In case you are using the new GFBio Single Sign On, please login via <a href="https://www.gfbio.org">www.gfbio.org</a>.
+        <mat-card class="info" *ngIf="loginForm.controls.loginAuthority.value === 'gfbio' && !appInIframe">
+            In case you are using the new GFBio single sign on, please login via <a href="https://www.gfbio.org">www.gfbio.org</a>.
             You can still login with your legacy GFBio account.
         </mat-card>
-        <mat-form-field>
+        <mat-card class="info" *ngIf="loginForm.controls.loginAuthority.value === 'gfbio' && appInIframe">
+            VAT is using the new GFBio single sign on.
+            For now, please login via the portal.
+        </mat-card>
+        <mat-form-field *ngIf="!(loginForm.controls.loginAuthority.value === 'gfbio' && appInIframe)">
             <input matInput type="text" placeholder="Username" formControlName="username">
         </mat-form-field>
-        <mat-form-field>
+        <mat-form-field *ngIf="!(loginForm.controls.loginAuthority.value === 'gfbio' && appInIframe)">
             <input matInput type="password" placeholder="Password" formControlName="password">
         </mat-form-field>
         <p class="error" *ngIf="invalidCredentials$ | async">Invalid Credentials</p>
-        <mat-checkbox formControlName="staySignedIn">Stay signed in</mat-checkbox>
-        <button mat-raised-button type="submit" [disabled]="(loginForm.statusChanges | async) !== 'VALID'" color="primary">
+        <mat-checkbox formControlName="staySignedIn" *ngIf="!(loginForm.controls.loginAuthority.value === 'gfbio' && appInIframe)">Stay signed in</mat-checkbox>
+        <button mat-raised-button type="submit"
+                *ngIf="!(loginForm.controls.loginAuthority.value === 'gfbio' && appInIframe)"
+                [disabled]="(loginForm.statusChanges | async) !== 'VALID'" color="primary">
             Login
         </button>
     </form>
