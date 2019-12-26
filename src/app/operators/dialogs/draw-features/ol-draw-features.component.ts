@@ -9,7 +9,7 @@ import {Projections, Projection} from '../../projection.model';
 import {Operator} from '../../operator.model';
 import {
     AbstractVectorSymbology, ComplexPointSymbology,
-    ComplexVectorSymbology
+    ComplexVectorSymbology, IconSymbology
 } from '../../../layers/symbology/symbology.model';
 import {UnexpectedResultType} from '../../../util/errors';
 import {VectorLayer} from '../../../layers/layer.model';
@@ -29,7 +29,7 @@ import {Subscription} from 'rxjs';
 
 export class OlDrawFeaturesComponent implements OnInit, OnDestroy {
 
-    featureTypes = ['Polygon', 'Point'];
+    featureTypes = ['Polygon', 'Point', 'Whale'];
     selectedFeatureType: OlGeometryType;
     isDrawingActive = false;
     olFeatureWriter = new OlFormatWKT();
@@ -57,7 +57,11 @@ export class OlDrawFeaturesComponent implements OnInit, OnDestroy {
 
     startDrawing() {
         this.isDrawingActive = true;
-        this.mapService.startDrawInteraction(this.selectedFeatureType);
+        if (this.selectedFeatureType === 'Whale') {
+            this.mapService.startDrawInteraction('Point');
+        } else {
+            this.mapService.startDrawInteraction(this.selectedFeatureType);
+        }
         this.notificationService.info('Start drawing...')
     }
 
@@ -82,6 +86,14 @@ export class OlDrawFeaturesComponent implements OnInit, OnDestroy {
                 resultSymbology = ComplexPointSymbology.createClusterSymbology({
                     fillRGBA: this.randomColorService.getRandomColorRgba(),
                 });
+                break;
+            case 'Whale':
+                resultType = ResultTypes.POINTS;
+                resultSymbology = IconSymbology.fromConfig({
+                    uri: '../../../../assets/icons/whale.png',
+                    fillRGBA: undefined,
+                    strokeRGBA: undefined,
+                    strokeWidth: 0 });
                 break;
             case 'Polygon':
                 resultType = ResultTypes.POLYGONS;

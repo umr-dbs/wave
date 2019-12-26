@@ -1,8 +1,10 @@
-import {Style as OlStyle,
-    StyleFunction as OlStyleFunction,
+import {
     Circle as OlStyleCircle,
     Fill as OlStyleFill,
     Stroke as OlStyleStroke,
+    Style as OlStyle,
+    Icon as OlIcon,
+    StyleFunction as OlStyleFunction,
     Text as OlStyleText,
 } from 'ol/style';
 // import {} from 'ol/style/Fill'
@@ -13,14 +15,13 @@ import {Feature as OlFeature} from 'ol';
 
 
 import {
-    SymbologyType,
     AbstractVectorSymbology,
-    SimpleVectorSymbology,
-    SimplePointSymbology,
-    ComplexVectorSymbology,
     ComplexPointSymbology,
+    ComplexVectorSymbology,
     DEFAULT_VECTOR_HIGHLIGHT_FILL_COLOR,
-    DEFAULT_VECTOR_HIGHLIGHT_STROKE_COLOR
+    DEFAULT_VECTOR_HIGHLIGHT_STROKE_COLOR, IconSymbology,
+    SimplePointSymbology,
+    SymbologyType
 } from '../layers/symbology/symbology.model';
 
 export class StyleCreator {
@@ -39,7 +40,8 @@ export class StyleCreator {
 
             case SymbologyType.COMPLEX_POINT:
                 return StyleCreator.fromComplexPointSymbology(sym as ComplexPointSymbology);
-
+            case SymbologyType.ICON_POINT:
+                return StyleCreator.fromIconPointSymbology(sym as IconSymbology);
             default:
                 console.error('StyleCreator: unknown Symbology: ' + sym.getSymbologyType())
                 return StyleCreator.fromSimpleVectorSymbology(sym); // Lets pretend unknown symbology is a simple vector...
@@ -52,6 +54,17 @@ export class StyleCreator {
         highlightSymbology.fillRGBA = DEFAULT_VECTOR_HIGHLIGHT_FILL_COLOR;
         highlightSymbology.strokeRGBA = DEFAULT_VECTOR_HIGHLIGHT_STROKE_COLOR;
         return highlightSymbology;
+    }
+
+    static fromIconPointSymbology(sym: IconSymbology) {
+        return new OlStyle({
+            image: new OlIcon({
+                anchor: [0.5, 0.5],
+                anchorXUnits: 'fraction',
+                anchorYUnits: 'fraction',
+                src: sym.uri
+            })
+        });
     }
 
     static fromSimpleVectorSymbology(sym: AbstractVectorSymbology): OlStyle {

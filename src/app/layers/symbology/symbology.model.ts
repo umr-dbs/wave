@@ -173,6 +173,64 @@ export abstract class AbstractVectorSymbology extends Symbology {
     }
 }
 
+interface IconSymbologyDict extends VectorSymbologyDict  {
+    uri: string;
+}
+
+export interface IconSymbologyConfig extends VectorSymbologyConfig {
+    uri: string;
+}
+
+export class IconSymbology extends AbstractVectorSymbology {
+    uri: string;
+
+    clone(): Symbology {
+        return IconSymbology.fromConfig(this.toConfig());
+    }
+
+    static fromConfig(config: IconSymbologyConfig) {
+        return new IconSymbology(config);
+    }
+
+    protected constructor(config: IconSymbologyConfig) {
+        super(config);
+        this.uri = config.uri;
+    }
+
+    describesArea(): boolean {
+        return false;
+    }
+
+    describesRadius(): boolean {
+        return false;
+    }
+
+    getSymbologyType(): SymbologyType {
+        return SymbologyType.ICON_POINT;
+    }
+
+    toConfig(): IconSymbologyConfig {
+        return {
+            fillRGBA: undefined,
+            strokeRGBA: undefined,
+            strokeWidth: 0,
+            uri: this.uri
+        };
+    }
+
+    toDict(): IconSymbologyDict {
+        return {
+            fillRGBA: undefined,
+            strokeRGBA: undefined,
+            strokeWidth: 0,
+            uri: this.uri,
+            symbologyType: SymbologyType[SymbologyType.ICON_POINT]
+        };
+    }
+}
+
+
+
 export class SimpleVectorSymbology extends AbstractVectorSymbology {
 
     static fromConfig(config: VectorSymbologyConfig) {
