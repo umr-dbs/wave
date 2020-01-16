@@ -141,6 +141,10 @@
                                                   [style.fill]='layer.symbology.fillRGBA.rgbaCssString()'
                                         ></mat-icon>
                                     </ng-template>
+                                    <ng-template [ngIf]="layer.visible && layer.symbology.getSymbologyType() === ST.ICON_POINT">
+                                        <img [src]="layer.symbology.uri" alt="icon" style="border-radius: 25%"
+                                             [style.background-color]="layer.symbology !== undefined && layer.symbology.color !== undefined ? layer.symbology.color.rgbaCssString() : 'transparent'">
+                                    </ng-template>
                                     <ng-template [ngIf]="false">
                                         <mat-icon mat-list-icon svgIcon="symbology:line"></mat-icon>
                                     </ng-template>
@@ -169,6 +173,7 @@
                                 <div #layerName
                                      class="layer-list-item-text grabbable"
                                      fxFlex="grow"
+                                     style="padding-left: 4px"
                                      (click)="layerService.setSelectedLayer(layer)"
                                      [matTooltip]="layer.name" matTooltipPosition="after"
                                      [matTooltipShowDelay]="config.DELAYS.TOOLTIP"
@@ -190,6 +195,9 @@
                                  fxLayoutAlign="space-between stretch"
                                  fxLayout="row"
                                  class="legendary no-drag">
+
+                                <ng-template [ngSwitchCase]="ST.ICON_POINT">
+                                </ng-template>
 
                                 <ng-template [ngSwitchCase]="ST.SIMPLE_POINT">
                                     <wave-legendary-points fxFlex="grow" [symbology]="layer.symbology">

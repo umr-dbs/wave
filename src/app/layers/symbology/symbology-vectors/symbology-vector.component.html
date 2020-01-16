@@ -1,4 +1,11 @@
-<table>
+<div>
+    <mat-slide-toggle
+        [checked]="displayAsIcon"
+        (change)="updateDisplayAsIcon($event)">
+        Display as icon
+    </mat-slide-toggle>
+</div>
+<table *ngIf="!displayAsIcon">
     <tr *ngIf="editStrokeWidth">
         <td>
             <span>Stroke width</span>
@@ -33,7 +40,7 @@
 </div>
 -->
 
-<div>
+<div *ngIf="!displayAsIcon">
     <wave-color-breakpoint [ngModel]="symbology.fillColorBreakpoint" attributePlaceholder="Fill color" disabledAttribute="true"
                            (ngModelChange)="updateFill($event)">
     </wave-color-breakpoint>
@@ -43,7 +50,7 @@
 
 </div>
 
-<div>
+<div *ngIf="!displayAsIcon">
     <mat-slide-toggle
         [checked]="colorizeByAttribute"
         (change)="updateColorizeByAttribute($event)">
@@ -62,6 +69,89 @@
             </mat-option>
         </mat-select>
     </mat-form-field>
+</div>
+<!--
+<div *ngIf="displayAsIcon">
+    <mat-form-field>
+        <mat-select placeholder="Icon"
+                    [(ngModel)]="iconAttribute"
+                    (selectionChange)="updateIconUrl($event)">
+            <mat-option *ngFor="let icon of iconAttributes" [value]="icon.uri">
+                {{ icon.name }}
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
+</div>-->
+
+<div>
+    <table *ngIf="displayAsIcon">
+        <tr>
+            <td>
+                <span>Icon</span>
+            </td>
+            <td>
+                <mat-form-field>
+                    <mat-select (selectionChange)="updateIconUrl($event)"
+                                [compareWith]="compareFn"
+
+                                [ngModel]="symbology.uri === undefined ? iconAttributes[0] : findIconByURI(symbology.uri)">
+                        <mat-option *ngFor="let icon of iconAttributes" [value]="icon.uri">
+                            {{ icon.name }}<img [src]="icon.uri" alt="icon" style="float: right">
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <span>Rotation</span>
+            </td>
+            <td>
+                <mat-slider #sla thumbLabel min="0" max="360" step="1" [value]="symbology.rotation === undefined ? 0 : symbology.rotation"
+                            (change)="updateRotation($event)"
+                            [disabled]="!displayAsIcon">
+                </mat-slider>
+                <span>{{sla.displayValue}} °</span>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <span>Opacity</span>
+            </td>
+            <td>
+                <mat-slider #slb thumbLabel min="0" max="1" step="0.1" [value]="symbology.opacity === undefined ? 1 : symbology.opacity"
+                            (change)="updateOpacity($event)"
+                            [disabled]="!displayAsIcon">
+                </mat-slider>
+                <span>{{slb.displayValue}}</span>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <span>Scale</span>
+            </td>
+            <td>
+                <mat-slider #slc thumbLabel min="0" max="2" step="0.1" [value]="symbology.scale === undefined ? 1 : symbology.scale"
+                            (change)="updateScale($event)"
+                            [disabled]="!displayAsIcon">
+
+                </mat-slider>
+                <span>{{slc.displayValue}} x</span>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <span style="float: top">Icon color</span>
+            </td>
+            <td>
+                <wave-color-breakpoint  [attributePlaceholder]="null"
+                    [ngModel]="symbology.iconColorBreakpoint" disabledAttribute="true"
+                                       (ngModelChange)="updateIconColor($event)"
+                                       [disabled]="!displayAsIcon">
+                </wave-color-breakpoint>
+            </td>
+        </tr>
+    </table>
 </div>
 
 <div *ngIf="colorizeByAttribute && !!symbology.colorAttribute">

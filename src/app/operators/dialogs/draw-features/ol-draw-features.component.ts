@@ -29,7 +29,7 @@ import {Subscription} from 'rxjs';
 
 export class OlDrawFeaturesComponent implements OnInit, OnDestroy {
 
-    featureTypes = ['Polygon', 'Point', 'Whale'];
+    featureTypes = ['Polygon', 'Point'];
     selectedFeatureType: OlGeometryType;
     isDrawingActive = false;
     olFeatureWriter = new OlFormatWKT();
@@ -57,11 +57,7 @@ export class OlDrawFeaturesComponent implements OnInit, OnDestroy {
 
     startDrawing() {
         this.isDrawingActive = true;
-        if (this.selectedFeatureType === 'Whale') {
-            this.mapService.startDrawInteraction('Point');
-        } else {
-            this.mapService.startDrawInteraction(this.selectedFeatureType);
-        }
+        this.mapService.startDrawInteraction(this.selectedFeatureType);
         this.notificationService.info('Start drawing...')
     }
 
@@ -86,14 +82,6 @@ export class OlDrawFeaturesComponent implements OnInit, OnDestroy {
                 resultSymbology = ComplexPointSymbology.createClusterSymbology({
                     fillRGBA: this.randomColorService.getRandomColorRgba(),
                 });
-                break;
-            case 'Whale':
-                resultType = ResultTypes.POINTS;
-                resultSymbology = IconSymbology.fromConfig({
-                    uri: '../../../../assets/icons/whale.png',
-                    fillRGBA: undefined,
-                    strokeRGBA: undefined,
-                    strokeWidth: 0 });
                 break;
             case 'Polygon':
                 resultType = ResultTypes.POLYGONS;

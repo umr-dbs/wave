@@ -40,6 +40,8 @@ export abstract class Symbology implements ISymbology {
         dict: SymbologyDict, deprecated?: any
     ): Symbology {
         switch (dict.symbologyType) {
+            case SymbologyType[SymbologyType.ICON_POINT]:
+                return IconSymbology.createIconSymbology(dict as IconSymbologyDict);
             case SymbologyType[SymbologyType.SIMPLE_POINT]:
                 return ComplexPointSymbology.createSimpleSymbology(dict as SimplePointSymbologyDict);
             case SymbologyType[SymbologyType.CLUSTERED_POINT]:
@@ -173,61 +175,6 @@ export abstract class AbstractVectorSymbology extends Symbology {
     }
 }
 
-interface IconSymbologyDict extends VectorSymbologyDict  {
-    uri: string;
-}
-
-export interface IconSymbologyConfig extends VectorSymbologyConfig {
-    uri: string;
-}
-
-export class IconSymbology extends AbstractVectorSymbology {
-    uri: string;
-
-    clone(): Symbology {
-        return IconSymbology.fromConfig(this.toConfig());
-    }
-
-    static fromConfig(config: IconSymbologyConfig) {
-        return new IconSymbology(config);
-    }
-
-    protected constructor(config: IconSymbologyConfig) {
-        super(config);
-        this.uri = config.uri;
-    }
-
-    describesArea(): boolean {
-        return false;
-    }
-
-    describesRadius(): boolean {
-        return false;
-    }
-
-    getSymbologyType(): SymbologyType {
-        return SymbologyType.ICON_POINT;
-    }
-
-    toConfig(): IconSymbologyConfig {
-        return {
-            fillRGBA: undefined,
-            strokeRGBA: undefined,
-            strokeWidth: 0,
-            uri: this.uri
-        };
-    }
-
-    toDict(): IconSymbologyDict {
-        return {
-            fillRGBA: undefined,
-            strokeRGBA: undefined,
-            strokeWidth: 0,
-            uri: this.uri,
-            symbologyType: SymbologyType[SymbologyType.ICON_POINT]
-        };
-    }
-}
 
 
 
@@ -672,4 +619,113 @@ export class MappingColorizerRasterSymbology extends RasterSymbology
         };
         return JSON.stringify(mcbs);
     }
+}
+
+
+interface IconAttribute {
+    name: string,
+    uri: string,
+}
+
+export class IconSymbology extends AbstractComplexVectorSymbology {
+    _iconColor: ColorBreakpoint = new ColorBreakpoint({rgba: Color.fromRgbaLike([0, 0, 0, 0]), value: 'Default'});
+
+    set iconColorBreakpoint(colorBreakpoint: ColorBreakpoint) {
+        this._iconColor = colorBreakpoint;
+        this.color = this._iconColor.rgba;
+    }
+
+    get iconColorBreakpoint(): ColorBreakpoint {
+        return this._iconColor;
+    }
+
+    clone(): IconSymbology {
+        return IconSymbology.fromConfig(this.toDict());
+    }
+    uri = 'assets/icons/happyWhale.png';
+    color?: Color;
+    rotation = 0;
+    scale = 1;
+    opacity = 1;
+
+    static fromConfig(config: IconSymbologyConfig) {
+        return new IconSymbology(config);
+    }
+
+    protected constructor(config: IconSymbologyConfig) {
+        super(config);
+        if (config.uri !== undefined) {
+            this.uri = config.uri;
+        }
+        if (config.color !== undefined) {
+            this.color = Color.fromRgbaLike(config.color);
+            this._iconColor = new ColorBreakpoint({rgba: this.color.rgbaTuple(), value: this.color.rgbaCssString()});
+        }
+        if (config.rotation !== undefined) {
+            this.rotation = config.rotation;
+        }
+        if (config.scale !== undefined) {
+            this.scale = config.scale;
+        }
+        if (config.opacity !== undefined) {
+            this.opacity = config.opacity;
+        }
+    }
+
+    describesArea(): boolean {
+        return false;
+    }
+
+    describesRadius(): boolean {
+        return false;
+    }
+
+    getSymbologyType(): SymbologyType {
+        return SymbologyType.ICON_POINT;
+    }
+
+    toConfig(): IconSymbologyConfig {
+        return {
+            fillRGBA: undefined,
+            strokeRGBA: undefined,
+            strokeWidth: 0,
+            uri: this.uri
+        };
+    }
+
+    toDict(): IconSymbologyDict {
+        return {
+            colorAttribute: '', colorizer: undefined, textAttribute: '', textColor: undefined, textStrokeWidth: 0,
+            fillRGBA: undefined,
+            strokeRGBA: undefined,
+            strokeWidth: 0,
+            uri: this.uri,
+            rotation: this.rotation,
+            opacity: this.opacity,
+            scale: this.scale,
+            color: this.color,
+            symbologyType: SymbologyType[SymbologyType.ICON_POINT]
+        };
+    }
+
+    static createIconSymbology(config: IconSymbologyConfig): IconSymbology {
+        return new IconSymbology(config);
+    }
+}
+
+
+interface IconSymbologyDict extends ComplexVectorSymbologyDict  {
+    uri?: string;
+    color?: Color;
+    rotation?: number;
+    scale?: number;
+    opacity?: number;
+}
+
+export interface IconSymbologyConfig extends ComplexVectorSymbologyConfig {
+    uri?: string;
+    color?: Color;
+    rotation?: number;
+    scale?: number;
+    opacity?: number;
 }

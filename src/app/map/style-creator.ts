@@ -57,13 +57,21 @@ export class StyleCreator {
     }
 
     static fromIconPointSymbology(sym: IconSymbology) {
+        let config = {
+            anchor: [0.5, 0.5],
+            anchorXUnits: 'fraction',
+            anchorYUnits: 'fraction',
+            src: sym.uri,
+            rotation: (Math.PI / 180) * sym.rotation,
+            scale: sym.scale,
+            opacity: sym.opacity
+        };
+        let color = sym.iconColorBreakpoint.rgba;
+        if (color.a > 0) {
+            config['color'] = color.rgbaTuple();
+        }
         return new OlStyle({
-            image: new OlIcon({
-                anchor: [0.5, 0.5],
-                anchorXUnits: 'fraction',
-                anchorYUnits: 'fraction',
-                src: sym.uri
-            })
+            image: new OlIcon(config)
         });
     }
 

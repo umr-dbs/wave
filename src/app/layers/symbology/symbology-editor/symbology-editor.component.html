@@ -36,8 +36,17 @@
         </wave-symbology-vector>
     </ng-template>
 
+    <ng-template [ngSwitchCase]="ST.ICON_POINT">
+        <wave-symbology-vector fxFlex="grow"
+                               [layer]="layer"
+                               class="no-drag"
+                               [editRadius]="false"
+                               (symbologyChanged)="update_symbology(layer, $event)">
+        </wave-symbology-vector>
+    </ng-template>
+
     <ng-template [ngSwitchCase]="ST.SIMPLE_VECTOR">
-        <wave-symbology-vector fxFlex="grow" 
+        <wave-symbology-vector fxFlex="grow"
                                [layer]="layer"
                                class="no-drag"
                                [editRadius]="false"
@@ -46,7 +55,7 @@
     </ng-template>
 
     <ng-template [ngSwitchCase]="ST.COMPLEX_VECTOR">
-        <wave-symbology-vector fxFlex="grow" 
+        <wave-symbology-vector fxFlex="grow"
                                [layer]="layer"
                                class="no-drag"
                                [editRadius]="false"
