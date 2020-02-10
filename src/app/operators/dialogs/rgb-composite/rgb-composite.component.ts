@@ -3,7 +3,7 @@ import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {ResultTypes} from '../../result-type.model';
 import {ProjectService} from '../../../project/project.service';
 import {Layer, RasterLayer} from '../../../layers/layer.model';
-import {MappingColorizerRasterSymbology, RasterSymbology, Symbology} from '../../../layers/symbology/symbology.model';
+import {MappingColorizerRasterSymbology, RasterSymbology, AbstractSymbology} from '../../../layers/symbology/symbology.model';
 import {Interpolation, Unit} from '../../unit.model';
 import {Operator} from '../../operator.model';
 import {NotificationService} from '../../../notification.service';
@@ -59,7 +59,7 @@ export class RgbCompositeComponent implements OnInit, OnDestroy {
         });
 
         this.formIsInvalid$ = this.form.statusChanges.pipe(map(status => status !== 'VALID'));
-        this.notAllLayersSet$ = this.form.controls['inputLayers'].valueChanges.pipe(map((value: Array<Layer<Symbology>>) => {
+        this.notAllLayersSet$ = this.form.controls['inputLayers'].valueChanges.pipe(map((value: Array<Layer<AbstractSymbology>>) => {
             return value === undefined
                 || value === null
                 || value.length !== 3
@@ -206,5 +206,5 @@ interface RasterStatisticsType {
             min: number,
             nan_count: number,
         }>,
-    },
+    };
 }
