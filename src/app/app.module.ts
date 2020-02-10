@@ -159,6 +159,7 @@ import {
     LayerListWorkflowParameterSliderComponent
 } from './operators/parameter-options/layer-list-workflow-parameter-slider/layer-list-workflow-parameter-slider.component';
 import {IfEUMETSATDirective} from './util/directives/if-eumetsat.directive';
+import {RgbCompositeComponent} from './operators/dialogs/rgb-composite/rgb-composite.component';
 
 export function configInitializer(config: Config) {
     return () => config.load();
@@ -311,7 +312,7 @@ export function configInitializer(config: Config) {
         LayerStatisticsViewComponent,
         LayerStatisticsNumericDetailsComponent,
         LayerStatisticsTextualDetailsComponent,
-        CreateRgbCompositeComponent,
+        RgbCompositeComponent,
     ],
     imports: [
         BrowserAnimationsModule,
@@ -331,7 +332,7 @@ export function configInitializer(config: Config) {
         ChangeProjectionComponent,
         ColorizerEditorComponent,
         CountryPolygonSelectionComponent,
-        CreateRgbCompositeComponent,
+        RgbCompositeComponent,
         CsvDialogComponent,
         CsvErrorDialog,
         DataRepositoryComponent,
