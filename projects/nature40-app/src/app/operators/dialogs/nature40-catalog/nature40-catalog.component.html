@@ -30,7 +30,17 @@
                             <mat-icon mat-list-icon>open_in_new</mat-icon>
                         </a>
                     </h4>
-                    <p mat-line>{{entry.description}}</p>
+                    <p mat-line>
+                        {{entry.description}}
+                        <span *ngIf="entry.provider.type === 'RSDB' && entry.dataset.type === 'vector'">
+                            <button mat-stroked-button type="button"
+                                    (click)="add(entry, 'points');$event.stopPropagation()">Points</button>
+                            <button mat-stroked-button type="button"
+                                    (click)="add(entry, 'lines');$event.stopPropagation()">Lines</button>
+                            <button mat-stroked-button type="button"
+                                    (click)="add(entry, 'polygons');$event.stopPropagation()">Polygons</button>
+                        </span>
+                    </p>
                 </div>
             </mat-list-item>
             <mat-divider></mat-divider>

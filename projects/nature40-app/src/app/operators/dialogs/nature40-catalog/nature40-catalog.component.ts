@@ -23,11 +23,18 @@ import {
     ResultTypes,
     Projections,
     GdalSourceType,
-    Provenance, UserService,
+    Provenance,
+    UserService,
+    OgrSourceTypeDict,
+    VectorLayer,
+    VectorSymbology,
+    RandomColorService,
+    Layer,
 } from 'wave-core';
 
 import {Nature40CatalogEntry, Nature40UserService} from '../../../users/nature40-user.service';
 import {AppConfig} from '../../../app-config.service';
+import {AbstractSymbology, LineSymbology, PointSymbology} from '../../../../../../wave-core/src/lib/layers/symbology/symbology.model';
 
 @Component({
     selector: 'wave-nature40-catalog',
@@ -46,6 +53,7 @@ export class Nature40CatalogComponent implements OnInit, OnDestroy {
                 @Inject(UserService) private readonly userService: Nature40UserService,
                 private readonly projectService: ProjectService,
                 private readonly notificationService: NotificationService,
+                private readonly randomColorService: RandomColorService,
                 private readonly http: HttpClient) {
         this.catalog$ = this.userService.getNature40Catalog();
     }
@@ -65,7 +73,8 @@ export class Nature40CatalogComponent implements OnInit, OnDestroy {
         return this.isResolving.get(entry).pipe(map(value => !value));
     }
 
-    add(entry: Nature40CatalogEntry) {
+    // TODO: remove the `resultTypeHint` once the metadata provides us with this information
+    add(entry: Nature40CatalogEntry, resultTypeHint?: 'points' | 'lines' | 'polygons') {
         if (this.isResolving.has(entry)) {
             this.isResolving.get(entry).next(true);
         } else {
@@ -82,12 +91,14 @@ export class Nature40CatalogComponent implements OnInit, OnDestroy {
                 switch (metadata.type) {
                     case 'gdal_source':
                         return of(Nature40CatalogComponent.createGdalSourceLayer(entry, metadata as GdalSourceMetadata));
+                    case 'ogr_source':
+                        return of(this.createOgrSourceLayer(entry, metadata as OgrSourceMetadata, resultTypeHint));
                     default:
                         return throwError(`Layer type »${metadata.type}« is not yet supported`);
                 }
             }),
         ).subscribe(
-            layer => {
+            (layer: Layer<AbstractSymbology>) => {
                 this.isResolving.get(entry).next(false);
                 this.projectService.addLayer(layer);
             },
@@ -99,7 +110,7 @@ export class Nature40CatalogComponent implements OnInit, OnDestroy {
     }
 
     private static createGdalSourceLayer(entry: Nature40CatalogEntry,
-                                         metadata: GdalSourceMetadata): RasterLayer<MappingRasterSymbology> {
+                                         metadata: GdalSourceMetadata): Layer<AbstractSymbology> {
         for (const channel of metadata.channels) { // TODO: smart layer for other channels
             const datatype = DataTypes.fromCode(Nature40CatalogComponent.rsdbToMappingDataType(channel.datatype));
             const unit = Unit.fromMappingDict(channel.unit);
@@ -145,6 +156,64 @@ export class Nature40CatalogComponent implements OnInit, OnDestroy {
                 symbology: MappingRasterSymbology.createSymbology({unit}),
             });
         }
+    }
+
+    private createOgrSourceLayer(entry: Nature40CatalogEntry,
+                                 metadata: OgrSourceMetadata,
+                                 resultTypeHint?: 'points' | 'lines' | 'polygons'): Layer<AbstractSymbology> {
+        const operatorType = OgrSourceType.fromDict(metadata.ogr_source);
+
+        const operator = new Operator({
+            attributes: [...operatorType.numeric, ...operatorType.textual],
+            dataTypes: ImmutableMap<string, DataType>([
+                ...operatorType.numeric.map(attribute => [attribute, DataTypes.Float64]),
+                ...operatorType.textual.map(attribute => [attribute, DataTypes.Alphanumeric]),
+            ] as Array<[string, DataType]>),
+            units: ImmutableMap<string, Unit>([
+                ...operatorType.numeric.map(attribute => [attribute, Unit.defaultUnit]),
+                ...operatorType.textual.map(attribute => [attribute, Unit.defaultUnit]),
+            ] as Array<[string, Unit]>),
+            operatorType,
+            operatorTypeParameterOptions: undefined,
+            projection: Projections.WGS_84, // TODO: make configurable once the OgrSource allows other CRS
+            resultType: ResultTypes.fromCode(resultTypeHint), // TODO: make configurable when it is in the metadata
+        });
+
+        let clustered = false;
+        let symbology;
+        switch (operator.resultType) {
+            case ResultTypes.POINTS: {
+                symbology = PointSymbology.createClusterSymbology({
+                    fillRGBA: this.randomColorService.getRandomColorRgba(),
+                });
+                clustered = true;
+                break;
+            }
+            case ResultTypes.POLYGONS: {
+                symbology = VectorSymbology.createSymbology({
+                    fillRGBA: this.randomColorService.getRandomColorRgba(),
+                });
+                break;
+            }
+            case ResultTypes.LINES: {
+                symbology = LineSymbology.createSymbology({
+                    fillRGBA: [255, 255, 255, 1],
+                    strokeRGBA: this.randomColorService.getRandomColorRgba(),
+                    strokeWidth: 2,
+                });
+                break;
+            }
+            default: {
+                throw new Error(`unhandled result type: ${operator.resultType}`);
+            }
+        }
+
+        return new VectorLayer<VectorSymbology>({
+            name: entry.title,
+            operator,
+            clustered,
+            symbology,
+        });
     }
 
     private static provenanceOfEntry(entry: Nature40CatalogEntry): Provenance {
@@ -199,4 +268,9 @@ interface GdalSourceMetadata extends Nature40CatalogEntryMetadata {
         name: string;
         unit: UnitMappingDict;
     }>;
+}
+
+interface OgrSourceMetadata extends Nature40CatalogEntryMetadata {
+    type: 'ogr_source';
+    ogr_source: OgrSourceTypeDict;
 }
