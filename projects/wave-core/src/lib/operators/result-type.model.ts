@@ -105,16 +105,20 @@ export class ResultTypeCollection {
     }
 
     fromCode(type: string) {
-        switch (type.toLowerCase()) {
+        const lowercase_type = type.toLowerCase();
+        switch (lowercase_type) {
             case this.RASTER.getCode():
                 return this.RASTER;
             case this.POINTS.getCode():
             case 'point':
+            case 'multi point':
                 return this.POINTS;
             case 'line string':
+            case 'multi line string':
             case this.LINES.getCode():
                 return this.LINES;
             case this.POLYGONS.getCode():
+            case 'polygon':
             case 'multi surface':
             case 'multi polygon':
                 return this.POLYGONS;
