@@ -112,10 +112,12 @@ export class ResultTypeCollection {
             case 'point':
                 return this.POINTS;
             case 'line string':
+            case 'multi line string':
             case this.LINES.getCode():
                 return this.LINES;
             case this.POLYGONS.getCode():
             case 'multi surface':
+            case 'multi polygon':
                 return this.POLYGONS;
             case this.PLOT.getCode():
                 return this.PLOT;
