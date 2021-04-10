@@ -63,11 +63,6 @@ export class MultiLayerSelectionComponent implements ControlValueAccessor, OnCha
     @Input() max = 1;
 
     /**
-     * The initial amount of elements to select.
-     */
-    @Input() initialAmount = 1;
-
-    /**
      * The type is used as a filter for the layers to choose from.
      */
     @Input() types: Array<ResultType>;
@@ -89,7 +84,7 @@ export class MultiLayerSelectionComponent implements ControlValueAccessor, OnCha
 
     constructor(private projectService: ProjectService) {
         this.layerSubscription = this.filteredLayers.subscribe((filteredLayers) => {
-            this.selectedLayers.next(this.layersForInitialSelection(filteredLayers, [], this.initialAmount));
+            this.selectedLayers.next(this.layersForInitialSelection(filteredLayers, [], this.min));
         });
 
         this.selectionSubscription = this.selectedLayers.subscribe((selectedLayers) => {
@@ -101,13 +96,10 @@ export class MultiLayerSelectionComponent implements ControlValueAccessor, OnCha
 
     ngOnChanges(changes: {[propertyName: string]: SimpleChange}): void {
         let minMaxInitialChanged = false;
-        let initialChange = false;
 
         // eslint-disable-next-line guard-for-in
         for (const propName in changes) {
             switch (propName) {
-                case 'initialAmount':
-                    initialChange = changes[propName].isFirstChange();
                 /* falls through */
                 case 'min':
                 case 'max':
@@ -162,11 +154,6 @@ export class MultiLayerSelectionComponent implements ControlValueAccessor, OnCha
                         // add selected layers
                         const difference = this.min - amountOfLayers;
                         this.selectedLayers.next(selectedLayers.concat(this.layersForInitialSelection(filteredLayers, [], difference)));
-                    }
-
-                    if (initialChange) {
-                        // set initial layers
-                        this.selectedLayers.next(this.layersForInitialSelection(filteredLayers, [], this.initialAmount));
                     }
                 });
         }
